@@ -1,0 +1,8 @@
+*.iml
+local.properties
+/.gradle
+!.idea
+.idea/*
+!.idea/codeStyles
+build
+android-release.keystore

@@ -1,0 +1,54 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            name "IMG.LY Artifactory"
+            url "https://artifactory.img.ly/artifactory/maven"
+            mavenContent {
+                includeGroup("ly.img")
+            }
+        }
+    }
+}
+
+rootProject.name = "CE.SDK Android"
+if (file("smoke-tests-app").exists()) {
+    include ':smoke-tests-app'
+}
+new File(rootDir, "sources").listFiles().each {
+    if (it.isDirectory() && it.name.startsWith("editor") || it.name.startsWith("camera")) {
+        include ":${it.name}"
+        project(":${it.name}").projectDir = it
+    }
+}
+
+// Internal use only
+def ubqRootPath = "../../"
+def useLocalEngine = {
+    def propertiesFile = new File(rootDir, "local.properties")
+    if (!propertiesFile.exists()) return false
+    def properties = new Properties()
+    properties.load(propertiesFile.newDataInputStream())
+    properties.containsKey("useLocalEngine") && properties.getProperty("useLocalEngine").toBoolean()
+}
+
+if (System.getenv("UBQ_USE_LOCAL_ENGINE") == "true" || useLocalEngine()) {
+    includeBuild("$ubqRootPath/bindings/android") {
+        name "engine"
+        dependencySubstitution {
+            substitute module('ly.img:engine') using project(':engine')
+            substitute module('ly.img:engine-camera') using project(':engine-camera')
+        }
+    }
+}
+// Internal use only
