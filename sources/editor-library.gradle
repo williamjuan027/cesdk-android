@@ -3,10 +3,6 @@ apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'maven-publish'
 apply plugin: 'com.github.gmazzo.buildconfig'
 
-ext {
-    ubqVersion = new File("${project.rootDir}/../..", ".ubq-version").text.trim()
-}
-
 android {
     compileSdk libs.versions.androidCompileSdk.get().toInteger()
 
@@ -49,10 +45,11 @@ afterEvaluate {
                 def artifactoryUrl = "https://artifactory.img.ly/artifactory/maven"
                 def libGroupId = "ly.img"
                 def libArtifactId = project.name
+                def libVersion = new File("${project.rootDir}/../..", ".ubq-version").text.trim()
 
                 groupId libGroupId
                 artifactId libArtifactId
-                version ubqVersion
+                version libVersion
 
                 // Artifacts
                 from components.release
@@ -72,7 +69,7 @@ afterEvaluate {
                     licenses {
                         license {
                             name = "LICENSE"
-                            url = "$artifactoryUrl/${libGroupId.replace('.', "/")}/$artifactId/$ubqVersion/$artifactId-$ubqVersion-LICENSE.md"
+                            url = "$artifactoryUrl/${libGroupId.replace('.', "/")}/$artifactId/$libVersion/$artifactId-$libVersion-LICENSE.md"
                         }
                     }
                     developers {

@@ -5,9 +5,7 @@ android {
 }
 
 dependencies {
-    api (libs.cesdk.engine) {
-        version { strictly project.ext.ubqVersion }
-    }
+    api libs.cesdk.engine
     api libs.androidx.activity
 
     implementation platform(libs.compose.bom)

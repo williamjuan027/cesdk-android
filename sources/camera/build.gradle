@@ -7,9 +7,7 @@ android {
 dependencies {
     api project(':camera-core')
     implementation project(':editor-core-ui')
-    implementation (libs.cesdk.engine.camera) {
-        version { strictly project.ext.ubqVersion }
-    }
+    implementation libs.cesdk.engine.camera
 
     implementation libs.camera.core
     implementation libs.camera.camera2
