@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import ly.img.editor.base.components.color_picker.fillAndStrokeColors
 import ly.img.editor.core.EditorScope
+import ly.img.editor.core.component.CanvasMenu
 import ly.img.editor.core.component.Dock
 import ly.img.editor.core.component.InspectorBar
 import ly.img.editor.core.component.data.Nothing
@@ -40,6 +41,8 @@ import ly.img.editor.core.library.AssetLibrary
  * @param dock the configuration object of the dock that is displayed as horizontal list of items at the bottom of the editor.
  * @param inspectorBar the configuration object of the inspector bar that is displayed as horizontal list of items at the
  * bottom of the editor when a design block is selected.
+ * @param canvasMenu the configuration object of the canvas menu that is displayed as horizontal list of items next to
+ * the selected design block.
  */
 class EditorConfiguration<STATE : Parcelable> private constructor(
     val initialState: STATE,
@@ -51,6 +54,7 @@ class EditorConfiguration<STATE : Parcelable> private constructor(
     val overlay: (@Composable (EditorScope.(STATE) -> Unit))?,
     val dock: (@Composable EditorScope.() -> Dock)?,
     val inspectorBar: (@Composable EditorScope.() -> InspectorBar)?,
+    val canvasMenu: (@Composable EditorScope.() -> CanvasMenu)?,
     private val `_`: Nothing,
 ) {
     override fun toString(): String {
@@ -62,6 +66,8 @@ class EditorConfiguration<STATE : Parcelable> private constructor(
             ", onEvent = $onEvent" +
             ", overlay = $overlay" +
             ", dock = $dock" +
+            ", inspectorBar = $inspectorBar" +
+            ", canvasMenu = $canvasMenu" +
             ")"
     }
 
@@ -98,7 +104,11 @@ class EditorConfiguration<STATE : Parcelable> private constructor(
          * @param inspectorBar the configuration object of the inspector bar that is displayed as horizontal list of items at the
          * bottom of the editor when a design block is selected.
          * If null, then the inspector bar will not be rendered.
-         * By default [InspectorBar.remember] is returned with default values.
+         * By default [InspectorBar.remember] is returned with default items.
+         * @param canvasMenu the configuration object of the canvas menu that is displayed as horizontal list of items next to
+         * the selected design block.
+         * If null, then the canvas menu will not be rendered.
+         * By default [CanvasMenu.remember] is returned with default items.
          * @return an [EditorConfiguration] that should be used to launch an editor.
          */
         @Composable
@@ -112,6 +122,7 @@ class EditorConfiguration<STATE : Parcelable> private constructor(
             overlay: (@Composable (EditorScope.(STATE) -> Unit))? = null,
             dock: (@Composable EditorScope.() -> Dock)? = null,
             inspectorBar: (@Composable EditorScope.() -> InspectorBar)? = { InspectorBar.remember() },
+            canvasMenu: (@Composable EditorScope.() -> CanvasMenu)? = { CanvasMenu.remember() },
             `_`: Nothing = nothing,
         ): EditorConfiguration<STATE> =
             // todo consider adding all parameters as keys. If we add now it crashes.
@@ -126,6 +137,7 @@ class EditorConfiguration<STATE : Parcelable> private constructor(
                     overlay = overlay,
                     dock = dock,
                     inspectorBar = inspectorBar,
+                    canvasMenu = canvasMenu,
                     `_` = `_`,
                 )
             }
@@ -153,6 +165,7 @@ class EditorConfiguration<STATE : Parcelable> private constructor(
             },
             dock = null,
             inspectorBar = { InspectorBar.remember() },
+            canvasMenu = { CanvasMenu.remember() },
             `_` = `_`,
         )
     }
@@ -177,6 +190,7 @@ class EditorConfiguration<STATE : Parcelable> private constructor(
         overlay = { state -> overlay(state, editorContext.eventHandler) },
         dock = null,
         inspectorBar = { InspectorBar.remember() },
+        canvasMenu = { CanvasMenu.remember() },
         `_` = `_`,
     )
 }

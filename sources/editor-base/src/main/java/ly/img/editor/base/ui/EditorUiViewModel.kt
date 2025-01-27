@@ -26,8 +26,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ly.img.editor.base.components.actionmenu.CanvasActionMenuUiState
-import ly.img.editor.base.components.actionmenu.createCanvasActionMenuUiState
 import ly.img.editor.base.dock.AdjustmentSheetContent
 import ly.img.editor.base.dock.BottomSheetContent
 import ly.img.editor.base.dock.CustomBottomSheetContent
@@ -88,6 +86,7 @@ import ly.img.editor.core.event.EditorEventHandler
 import ly.img.editor.core.library.data.AssetSourceType
 import ly.img.editor.core.library.data.UploadAssetSourceType
 import ly.img.editor.core.sheet.SheetType
+import ly.img.editor.core.state.EditorState
 import ly.img.editor.core.ui.EventsHandler
 import ly.img.editor.core.ui.engine.BlockType
 import ly.img.editor.core.ui.engine.Scope
@@ -147,10 +146,12 @@ abstract class EditorUiViewModel(
     protected val isSceneLoaded: StateFlow<Boolean> = _isSceneLoaded
 
     protected var inPortraitMode = true
-    protected var currentInsets = Rect.Zero
 
     private val _uiState = MutableStateFlow(EditorUiViewState())
     protected val baseUiState: StateFlow<EditorUiViewState> = _uiState
+
+    private val _publicState = MutableStateFlow(EditorState())
+    val publicState: StateFlow<EditorState> = _publicState
 
     private val _uiEvent = Channel<SingleEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
@@ -162,9 +163,6 @@ abstract class EditorUiViewModel(
     private var closingSheetContent: BottomSheetContent? = null
     private val _bottomSheetContent = MutableStateFlow<BottomSheetContent?>(null)
     val bottomSheetContent = _bottomSheetContent.asStateFlow()
-
-    private val _canvasActionMenuUiState = MutableStateFlow<CanvasActionMenuUiState?>(null)
-    val canvasActionMenuUiState = _canvasActionMenuUiState.asStateFlow()
 
     private val _historyChangeTrigger = MutableSharedFlow<Unit>()
     protected val historyChangeTrigger = _historyChangeTrigger
@@ -334,6 +332,20 @@ abstract class EditorUiViewModel(
         register<EditorEvent.Selection.Delete> {
             timelineState?.playerState?.pause()
             getBlockForEvents()?.designBlock?.let(engine::delete)
+        }
+        register<EditorEvent.Selection.BringForward> {
+            timelineState?.playerState?.pause()
+            getBlockForEvents()?.designBlock?.let {
+                engine.block.bringForward(it)
+                engine.editor.addUndoStep()
+            }
+        }
+        register<EditorEvent.Selection.SendBackward> {
+            timelineState?.playerState?.pause()
+            getBlockForEvents()?.designBlock?.let {
+                engine.block.sendBackward(it)
+                engine.editor.addUndoStep()
+            }
         }
     }
 
@@ -510,7 +522,7 @@ abstract class EditorUiViewModel(
     }
 
     protected open fun onCanvasMove(move: Boolean) {
-        setCanvasActionMenuState(show = !move)
+        _publicState.update { it.copy(isTouchActive = move) }
     }
 
     protected open fun hasUnsavedChanges(): Boolean = _uiState.value.isUndoEnabled
@@ -625,7 +637,7 @@ abstract class EditorUiViewModel(
     private var lastKnownBottomInsetBeforeSheetOp = 0f
 
     protected fun setBottomSheetContent(function: (BottomSheetContent?) -> BottomSheetContent?) {
-        val currentInsetsBottom = currentInsets.bottom
+        val currentInsetsBottom = _publicState.value.canvasInsets.bottom
         val oldBottomSheetContent = bottomSheetContent.value
         val newValue = function(oldBottomSheetContent)
         if (newValue == null && oldBottomSheetContent != null && bottomSheetHeight > 0F) {
@@ -638,7 +650,7 @@ abstract class EditorUiViewModel(
         } else if (oldBottomSheetContent == null) {
             lastKnownBottomInsetBeforeSheetOp = currentInsetsBottom
         }
-        setCanvasActionMenuState(show = bottomSheetContent.value == null)
+        _publicState.update { it.copy(activeSheet = newValue?.type) }
     }
 
     private fun onSheetClosed() {
@@ -651,7 +663,6 @@ abstract class EditorUiViewModel(
     }
 
     private fun onZoomFinish() {
-        setCanvasActionMenuState()
         updateZoomState()
     }
 
@@ -861,10 +872,8 @@ abstract class EditorUiViewModel(
                 it.copy(pagesState = null)
             }
             onStopGenerateAllPageThumbnails()
-            setCanvasActionMenuState(show = true)
         } else {
             engine.deselectAllBlocks()
-            setCanvasActionMenuState(show = false)
             updateEditorPagesState()
         }
     }
@@ -938,7 +947,7 @@ abstract class EditorUiViewModel(
         showTimeline: Boolean = false,
     ) {
         val realBottomInset = bottomInset + verticalPageInset
-        if (realBottomInset <= defaultInsets.bottom && currentInsets.bottom == defaultInsets.bottom) return
+        if (realBottomInset <= defaultInsets.bottom && _publicState.value.canvasInsets.bottom == defaultInsets.bottom) return
         val coercedBottomInset = if (showTimeline && engine.isSceneModeVideo) lastKnownBottomInsetBeforeSheetOp else defaultInsets.bottom
         zoom(defaultInsets.copy(bottom = realBottomInset.coerceAtLeast(coercedBottomInset)))
     }
@@ -977,7 +986,7 @@ abstract class EditorUiViewModel(
         clampOnly: Boolean = false,
     ): Job {
         zoomJob?.cancel()
-        currentInsets = insets
+        _publicState.update { it.copy(canvasInsets = insets) }
         return viewModelScope
             .launch {
                 if (_uiState.value.isInPreviewMode) {
@@ -997,7 +1006,7 @@ abstract class EditorUiViewModel(
                                 add(selectedBlock.designBlock)
                             }
                         }
-
+                    val currentInsets = _publicState.value.canvasInsets
                     engine.scene.enableCameraPositionClamping(
                         blocks = blocks,
                         paddingLeft = currentInsets.left - horizontalPageInset,
@@ -1031,7 +1040,7 @@ abstract class EditorUiViewModel(
                         delay(8)
 
                         val boundingBoxRect = engine.block.getScreenSpaceBoundingBoxRect(listOf(selectedDesignBlock))
-                        val bottomSheetTop = canvasHeight - currentInsets.bottom
+                        val bottomSheetTop = canvasHeight - _publicState.value.canvasInsets.bottom
                         val camera = engine.getCamera()
                         val oldCameraPosX = engine.block.getPositionX(camera)
                         val oldCameraPosY = engine.block.getPositionY(camera)
@@ -1078,8 +1087,11 @@ abstract class EditorUiViewModel(
             }
     }
 
-    private fun zoomToText(insets: Rect = currentInsets) {
-        engine.zoomToSelectedText(insets, canvasHeight)
+    private fun zoomToText() {
+        engine.zoomToSelectedText(
+            insets = _publicState.value.canvasInsets,
+            canvasHeight = canvasHeight,
+        )
     }
 
     private fun observeUiStateChanges() {
@@ -1122,7 +1134,6 @@ abstract class EditorUiViewModel(
     private var cursorPos = 0f
 
     private fun observeEvents() {
-        var visibleAtCurrentPlaybackTimeFlag: Boolean? = null
         viewModelScope.launch {
             engine.event.subscribe().collect {
                 val durationBefore = timelineState?.totalDuration
@@ -1137,22 +1148,6 @@ abstract class EditorUiViewModel(
                         state.copy(timelineTrigger = state.timelineTrigger.not())
                     }
                 }
-
-                // update canvas action menu if visibility of block has changed
-                selectedBlock.value?.designBlock?.let { selectedBlock ->
-                    if (engine.block.isValid(selectedBlock)) {
-                        val visibleAtCurrentPlaybackTime = engine.block.isVisibleAtCurrentPlaybackTime(selectedBlock)
-                        if (visibleAtCurrentPlaybackTime != visibleAtCurrentPlaybackTimeFlag) {
-                            visibleAtCurrentPlaybackTimeFlag = visibleAtCurrentPlaybackTime
-                            setCanvasActionMenuState(show = visibleAtCurrentPlaybackTime)
-                        }
-                    } else {
-                        visibleAtCurrentPlaybackTimeFlag = null
-                    }
-                } ?: {
-                    visibleAtCurrentPlaybackTimeFlag = null
-                }
-
                 // text handling
                 if (engine.editor.getEditMode() != TEXT_EDIT_MODE) return@collect
                 val textCursorPositionInScreenSpaceY = engine.editor.getTextCursorPositionInScreenSpaceY()
@@ -1200,7 +1195,6 @@ abstract class EditorUiViewModel(
                             engine.editor.setSettingEnum("touch/pinchAction", TOUCH_ACTION_ZOOM)
                         }
 
-                        setCanvasActionMenuState(show = timelineState?.playerState?.isPlaying?.not() ?: true)
                         if (!flag) {
                             flag = true
                             zoom(zoomToPage = true)
@@ -1242,8 +1236,6 @@ abstract class EditorUiViewModel(
                         send(EditorEvent.Sheet.Open(SheetType.LibraryReplace(libraryCategory = libraryCategory)))
                     } else if (block == null || bottomSheetContent.value != null) {
                         send(EditorEvent.Sheet.Close(animate = false))
-                    } else {
-                        setCanvasActionMenuState()
                     }
                 }
             }
@@ -1257,7 +1249,6 @@ abstract class EditorUiViewModel(
                 timelineState?.onHistoryUpdated()
                 updateVisiblePageState()
                 updateBottomSheetUiState()
-                setCanvasActionMenuState()
                 if (_uiState.value.pagesState != null) {
                     updateEditorPagesState()
                 }
@@ -1321,24 +1312,6 @@ abstract class EditorUiViewModel(
                     }
                 exportJob?.join()
                 _isExporting.update { false }
-            }
-        }
-    }
-
-    private fun setCanvasActionMenuState(show: Boolean = true) {
-        val block = selectedBlock.value?.designBlock
-        val isVisible = !isKeyboardShowing.value && bottomSheetContent.value == null && show
-        _canvasActionMenuUiState.update {
-            if (block == null) {
-                null
-            } else if (!isVisible) {
-                it?.copy(show = false)
-            } else {
-                createCanvasActionMenuUiState(
-                    designBlock = block,
-                    currentInsets = currentInsets,
-                    engine = engine,
-                )
             }
         }
     }

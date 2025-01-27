@@ -181,12 +181,6 @@ import java.io.File
  *     )
  * }
  *
- * @param listBuilder a builder that registers the list of [Dock.Item]s that should be part of the dock.
- * Note that registering does not mean displaying. The items will be displayed if [Dock.Item.visible] is true for them.
- * Also note that items will be rebuilt when [scope] is updated.
- * By default, the list mentioned above is added to the dock.
- * @param horizontalArrangement the horizontal arrangement that should be used to render the items in the dock horizontally.
- * Default value is [Arrangement.SpaceEvenly].
  * @param scope the scope of this component. Every new value will trigger recomposition of all the lambda parameters.
  * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
  * Consider using Compose [androidx.compose.runtime.State] objects in @Composable DockScope.() -> {} lambdas
@@ -204,6 +198,12 @@ import java.io.File
  * @param decoration decoration of the button. Useful when you want to add custom background, foreground, shadow, paddings etc.
  * Default value is always no decoration.
  * Default value is [Dock.defaultDecoration].
+ * @param listBuilder a builder that registers the list of [Dock.Item]s that should be part of the dock.
+ * Note that registering does not mean displaying. The items will be displayed if [Dock.Item.visible] is true for them.
+ * Also note that items will be rebuilt when [scope] is updated.
+ * By default, the list mentioned above is added to the dock.
+ * @param horizontalArrangement the horizontal arrangement that should be used to render the items in the dock horizontally.
+ * Default value is [Arrangement.SpaceEvenly].
  * @param itemDecoration decoration of the items in the dock. Useful when you want to add custom background, foreground, shadow,
  * paddings etc to the items. Prefer using this decoration when you want to apply the same decoration to all the items, otherwise
  * set decoration to individual items.
@@ -213,8 +213,6 @@ import java.io.File
 @UnstableEditorApi
 @Composable
 fun Dock.Companion.rememberForDesign(
-    listBuilder: ListBuilder<Item<*>> = Dock.ListBuilder.rememberForDesign(),
-    horizontalArrangement: @Composable Scope.() -> Arrangement.Horizontal = { Arrangement.SpaceEvenly },
     scope: Scope =
         LocalEditorScope.current.run {
             remember(this) { Scope(parentScope = this) }
@@ -223,17 +221,19 @@ fun Dock.Companion.rememberForDesign(
     enterTransition: @Composable Scope.() -> EnterTransition = noneEnterTransition,
     exitTransition: @Composable Scope.() -> ExitTransition = noneExitTransition,
     decoration: @Composable Scope.(@Composable () -> Unit) -> Unit = defaultDecoration,
+    listBuilder: ListBuilder<Item<*>> = Dock.ListBuilder.rememberForDesign(),
+    horizontalArrangement: @Composable Scope.() -> Arrangement.Horizontal = { Arrangement.SpaceEvenly },
     itemDecoration: @Composable Scope.(content: @Composable () -> Unit) -> Unit = { it() },
     `_`: Nothing = nothing,
 ): Dock =
     remember(
-        listBuilder = listBuilder,
-        horizontalArrangement = horizontalArrangement,
         scope = scope,
         visible = visible,
         enterTransition = enterTransition,
         exitTransition = exitTransition,
         decoration = decoration,
+        listBuilder = listBuilder,
+        horizontalArrangement = horizontalArrangement,
         itemDecoration = itemDecoration,
         `_` = `_`,
     )
@@ -275,11 +275,6 @@ fun Dock.ListBuilder.Companion.rememberForDesign(): ListBuilder<Item<*>> {
  *
  * For more information on how to customize [listBuilder], check [rememberForDesign].
  *
- * @param listBuilder a builder that registers the list of [Dock.Item]s that should be part of the dock.
- * Note that registering does not mean displaying. The items will be displayed if [Dock.Item.visible] is true for them.
- * Also note that items will be rebuilt when [scope] is updated.
- * @param horizontalArrangement the horizontal arrangement that should be used to render the items in the dock horizontally.
- * Default value is [Arrangement.SpaceEvenly].
  * @param scope the scope of this component. Every new value will trigger recomposition of all the lambda parameters.
  * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
  * Consider using Compose [androidx.compose.runtime.State] objects in @Composable DockScope.() -> {} lambdas
@@ -296,6 +291,11 @@ fun Dock.ListBuilder.Companion.rememberForDesign(): ListBuilder<Item<*>> {
  * Default value is always no exit transition.
  * @param decoration decoration of the button. Useful when you want to add custom background, foreground, shadow, paddings etc.
  * Default value is [Dock.defaultDecoration].
+ * @param listBuilder a builder that registers the list of [Dock.Item]s that should be part of the dock.
+ * Note that registering does not mean displaying. The items will be displayed if [Dock.Item.visible] is true for them.
+ * Also note that items will be rebuilt when [scope] is updated.
+ * @param horizontalArrangement the horizontal arrangement that should be used to render the items in the dock horizontally.
+ * Default value is [Arrangement.SpaceEvenly].
  * @param itemDecoration decoration of the items in the dock. Useful when you want to add custom background, foreground, shadow,
  * paddings etc to the items. Prefer using this decoration when you want to apply the same decoration to all the items, otherwise
  * set decoration to individual items.
@@ -305,8 +305,6 @@ fun Dock.ListBuilder.Companion.rememberForDesign(): ListBuilder<Item<*>> {
 @UnstableEditorApi
 @Composable
 fun Dock.Companion.rememberForPhoto(
-    listBuilder: ListBuilder<Item<*>> = Dock.ListBuilder.rememberForPhoto(),
-    horizontalArrangement: @Composable Scope.() -> Arrangement.Horizontal = { Arrangement.SpaceEvenly },
     scope: Scope =
         LocalEditorScope.current.run {
             remember(this) { Scope(parentScope = this) }
@@ -315,17 +313,19 @@ fun Dock.Companion.rememberForPhoto(
     enterTransition: @Composable Scope.() -> EnterTransition = noneEnterTransition,
     exitTransition: @Composable Scope.() -> ExitTransition = noneExitTransition,
     decoration: @Composable Scope.(@Composable () -> Unit) -> Unit = defaultDecoration,
+    listBuilder: ListBuilder<Item<*>> = Dock.ListBuilder.rememberForPhoto(),
+    horizontalArrangement: @Composable Scope.() -> Arrangement.Horizontal = { Arrangement.SpaceEvenly },
     itemDecoration: @Composable Scope.(content: @Composable () -> Unit) -> Unit = { it() },
     `_`: Nothing = nothing,
 ): Dock =
     remember(
-        listBuilder = listBuilder,
-        horizontalArrangement = horizontalArrangement,
         scope = scope,
         visible = visible,
         enterTransition = enterTransition,
         exitTransition = exitTransition,
         decoration = decoration,
+        listBuilder = listBuilder,
+        horizontalArrangement = horizontalArrangement,
         itemDecoration = itemDecoration,
         `_` = `_`,
     )
@@ -370,11 +370,6 @@ fun Dock.ListBuilder.Companion.rememberForPhoto(): ListBuilder<Item<*>> {
  *
  * For more information on how to customize [listBuilder], check [rememberForDesign].
  *
- * @param listBuilder a builder that registers the list of [Dock.Item]s that should be part of the dock.
- * Note that registering does not mean displaying. The items will be displayed if [Dock.Item.visible] is true for them.
- * Also note that items will be rebuilt when [scope] is updated.
- * @param horizontalArrangement the horizontal arrangement that should be used to render the items in the dock horizontally.
- * Default value is [Arrangement.SpaceEvenly].
  * @param scope the scope of this component. Every new value will trigger recomposition of all the lambda parameters.
  * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
  * Consider using Compose [androidx.compose.runtime.State] objects in @Composable DockScope.() -> {} lambdas
@@ -391,6 +386,11 @@ fun Dock.ListBuilder.Companion.rememberForPhoto(): ListBuilder<Item<*>> {
  * Default value is always no exit transition.
  * @param decoration decoration of the button. Useful when you want to add custom background, foreground, shadow, paddings etc.
  * Default value is [Dock.defaultDecoration].
+ * @param listBuilder a builder that registers the list of [Dock.Item]s that should be part of the dock.
+ * Note that registering does not mean displaying. The items will be displayed if [Dock.Item.visible] is true for them.
+ * Also note that items will be rebuilt when [scope] is updated.
+ * @param horizontalArrangement the horizontal arrangement that should be used to render the items in the dock horizontally.
+ * Default value is [Arrangement.SpaceEvenly].
  * @param itemDecoration decoration of the items in the dock. Useful when you want to add custom background, foreground, shadow,
  * paddings etc to the items. Prefer using this decoration when you want to apply the same decoration to all the items, otherwise
  * set decoration to individual items.
@@ -401,8 +401,6 @@ fun Dock.ListBuilder.Companion.rememberForPhoto(): ListBuilder<Item<*>> {
 @UnstableEditorApi
 @Composable
 fun Dock.Companion.rememberForVideo(
-    listBuilder: ListBuilder<Item<*>> = Dock.ListBuilder.rememberForVideo(),
-    horizontalArrangement: @Composable Scope.() -> Arrangement.Horizontal = { Arrangement.SpaceEvenly },
     scope: Scope =
         LocalEditorScope.current.run {
             val engine = editorContext.engine
@@ -436,17 +434,19 @@ fun Dock.Companion.rememberForVideo(
     enterTransition: @Composable Scope.() -> EnterTransition = noneEnterTransition,
     exitTransition: @Composable Scope.() -> ExitTransition = noneExitTransition,
     decoration: @Composable Scope.(@Composable () -> Unit) -> Unit = defaultDecoration,
+    listBuilder: ListBuilder<Item<*>> = Dock.ListBuilder.rememberForVideo(),
+    horizontalArrangement: @Composable Scope.() -> Arrangement.Horizontal = { Arrangement.SpaceEvenly },
     itemDecoration: @Composable Scope.(content: @Composable () -> Unit) -> Unit = { it() },
     `_`: Nothing = nothing,
 ): Dock =
     remember(
-        listBuilder = listBuilder,
-        horizontalArrangement = horizontalArrangement,
         scope = scope,
         visible = visible,
         enterTransition = enterTransition,
         exitTransition = exitTransition,
         decoration = decoration,
+        listBuilder = listBuilder,
+        horizontalArrangement = horizontalArrangement,
         itemDecoration = itemDecoration,
         `_` = `_`,
     )
@@ -499,17 +499,6 @@ val Button.Id.Companion.elementsLibrary by unsafeLazy {
  * A composable helper function that creates and remembers a [Dock.Button] that
  * opens a library sheet with elements via [EditorEvent.Sheet.Open].
  *
- * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
- * Default value is always [IconPack.Elements].
- * @param text the text content of the button as a string. If null then text is not rendered.
- * Default value is always [R.string.ly_img_editor_elements].
- * @param tint the tint color of the content. If null then no tint is applied.
- * Default value is null.
- * @param enabled whether the button is enabled.
- * Default value is always true.
- * @param onClick the callback that is invoked when the button is clicked.
- * By default [EditorEvent.Sheet.Open] event is invoked with sheet type [SheetType.LibraryAdd] and
- * [ly.img.editor.core.library.AssetLibrary.elements] content is displayed on the sheet.
  * @param scope the scope of this component. Every new value will trigger recomposition of all the lambda parameters.
  * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
  * Consider using Compose [androidx.compose.runtime.State] objects in the lambdas for
@@ -525,10 +514,29 @@ val Button.Id.Companion.elementsLibrary by unsafeLazy {
  * Default value is always no exit transition.
  * @param decoration decoration of the button. Useful when you want to add custom background, foreground, shadow, paddings etc.
  * Default value is always no decoration.
+ * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
+ * Default value is always [IconPack.Elements].
+ * @param text the text content of the button as a string. If null then text is not rendered.
+ * Default value is always [R.string.ly_img_editor_elements].
+ * @param tint the tint color of the content. If null then no tint is applied.
+ * Default value is null.
+ * @param enabled whether the button is enabled.
+ * Default value is always true.
+ * @param onClick the callback that is invoked when the button is clicked.
+ * By default [EditorEvent.Sheet.Open] event is invoked with sheet type [SheetType.LibraryAdd] and
+ * [ly.img.editor.core.library.AssetLibrary.elements] content is displayed on the sheet.
  * @return a button that will be displayed in the dock.
  */
 @Composable
 fun Button.Companion.rememberElementsLibrary(
+    scope: ButtonScope =
+        LocalEditorScope.current.run {
+            remember(this) { ButtonScope(parentScope = this) }
+        },
+    visible: @Composable ButtonScope.() -> Boolean = alwaysVisible,
+    enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
+    exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
+    decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
     vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = { IconPack.Elements },
     text: (@Composable ButtonScope.() -> String)? = { stringResource(R.string.ly_img_editor_elements) },
     tint: (@Composable ButtonScope.() -> Color)? = null,
@@ -543,28 +551,20 @@ fun Button.Companion.rememberElementsLibrary(
             ),
         )
     },
-    scope: ButtonScope =
-        LocalEditorScope.current.run {
-            remember(this) { ButtonScope(parentScope = this) }
-        },
-    visible: @Composable ButtonScope.() -> Boolean = alwaysVisible,
-    enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
-    exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
-    decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
     `_`: Nothing = nothing,
 ): Button =
     remember(
         id = Button.Id.elementsLibrary,
-        vectorIcon = vectorIcon,
-        text = text,
-        tint = tint,
-        enabled = enabled,
-        onClick = onClick,
         scope = scope,
         visible = visible,
         enterTransition = enterTransition,
         exitTransition = exitTransition,
         decoration = decoration,
+        vectorIcon = vectorIcon,
+        text = text,
+        tint = tint,
+        enabled = enabled,
+        onClick = onClick,
         `_` = `_`,
     )
 
@@ -579,17 +579,6 @@ val Button.Id.Companion.overlaysLibrary by unsafeLazy {
  * A composable helper function that creates and remembers a [Dock.Button] that
  * opens a library sheet with overlays via [EditorEvent.Sheet.Open].
  *
- * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
- * Default value is always [IconPack.AddOverlay].
- * @param text the text content of the button as a string. If null then text is not rendered.
- * Default value is always [R.string.ly_img_editor_overlays].
- * @param tint the tint color of the content. If null then no tint is applied.
- * Default value is null.
- * @param enabled whether the button is enabled.
- * Default value is always true.
- * @param onClick the callback that is invoked when the button is clicked.
- * By default [EditorEvent.Sheet.Open] event is invoked with sheet type [SheetType.LibraryAdd] and
- * [ly.img.editor.core.library.AssetLibrary.overlays] content is displayed on the sheet.
  * @param scope the scope of this component. Every new value will trigger recomposition of all the lambda parameters.
  * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
  * Consider using Compose [androidx.compose.runtime.State] objects in the lambdas for
@@ -605,10 +594,29 @@ val Button.Id.Companion.overlaysLibrary by unsafeLazy {
  * Default value is always no exit transition.
  * @param decoration decoration of the button. Useful when you want to add custom background, foreground, shadow, paddings etc.
  * Default value is always no decoration.
+ * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
+ * Default value is always [IconPack.AddOverlay].
+ * @param text the text content of the button as a string. If null then text is not rendered.
+ * Default value is always [R.string.ly_img_editor_overlays].
+ * @param tint the tint color of the content. If null then no tint is applied.
+ * Default value is null.
+ * @param enabled whether the button is enabled.
+ * Default value is always true.
+ * @param onClick the callback that is invoked when the button is clicked.
+ * By default [EditorEvent.Sheet.Open] event is invoked with sheet type [SheetType.LibraryAdd] and
+ * [ly.img.editor.core.library.AssetLibrary.overlays] content is displayed on the sheet.
  * @return a button that will be displayed in the dock.
  */
 @Composable
 fun Button.Companion.rememberOverlaysLibrary(
+    scope: ButtonScope =
+        LocalEditorScope.current.run {
+            remember(this) { ButtonScope(parentScope = this) }
+        },
+    visible: @Composable ButtonScope.() -> Boolean = alwaysVisible,
+    enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
+    exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
+    decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
     vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = { IconPack.AddOverlay },
     text: (@Composable ButtonScope.() -> String)? = { stringResource(R.string.ly_img_editor_overlay) },
     tint: (@Composable ButtonScope.() -> Color)? = null,
@@ -623,28 +631,20 @@ fun Button.Companion.rememberOverlaysLibrary(
             ),
         )
     },
-    scope: ButtonScope =
-        LocalEditorScope.current.run {
-            remember(this) { ButtonScope(parentScope = this) }
-        },
-    visible: @Composable ButtonScope.() -> Boolean = alwaysVisible,
-    enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
-    exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
-    decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
     `_`: Nothing = nothing,
 ): Button =
     remember(
         id = Button.Id.overlaysLibrary,
-        vectorIcon = vectorIcon,
-        text = text,
-        tint = tint,
-        enabled = enabled,
-        onClick = onClick,
         scope = scope,
         visible = visible,
         enterTransition = enterTransition,
         exitTransition = exitTransition,
         decoration = decoration,
+        vectorIcon = vectorIcon,
+        text = text,
+        tint = tint,
+        enabled = enabled,
+        onClick = onClick,
         `_` = `_`,
     )
 
@@ -659,17 +659,6 @@ val Button.Id.Companion.imagesLibrary by unsafeLazy {
  * A composable helper function that creates and remembers a [Dock.Button] that
  * opens a library sheet with images via [EditorEvent.Sheet.Open].
  *
- * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
- * Default value is always [IconPack.AddImageForeground].
- * @param text the text content of the button as a string. If null then text is not rendered.
- * Default value is always [R.string.ly_img_editor_image].
- * @param tint the tint color of the content. If null then no tint is applied.
- * Default value is null.
- * @param enabled whether the button is enabled.
- * Default value is always true.
- * @param onClick the callback that is invoked when the button is clicked.
- * By default [EditorEvent.Sheet.Open] event is invoked with sheet type [SheetType.LibraryAdd] and
- * [ly.img.editor.core.library.AssetLibrary.images] content is displayed on the sheet.
  * @param scope the scope of this component. Every new value will trigger recomposition of all the lambda parameters.
  * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
  * Consider using Compose [androidx.compose.runtime.State] objects in the lambdas for
@@ -685,10 +674,29 @@ val Button.Id.Companion.imagesLibrary by unsafeLazy {
  * Default value is always no exit transition.
  * @param decoration decoration of the button. Useful when you want to add custom background, foreground, shadow, paddings etc.
  * Default value is always no decoration.
+ * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
+ * Default value is always [IconPack.AddImageForeground].
+ * @param text the text content of the button as a string. If null then text is not rendered.
+ * Default value is always [R.string.ly_img_editor_image].
+ * @param tint the tint color of the content. If null then no tint is applied.
+ * Default value is null.
+ * @param enabled whether the button is enabled.
+ * Default value is always true.
+ * @param onClick the callback that is invoked when the button is clicked.
+ * By default [EditorEvent.Sheet.Open] event is invoked with sheet type [SheetType.LibraryAdd] and
+ * [ly.img.editor.core.library.AssetLibrary.images] content is displayed on the sheet.
  * @return a button that will be displayed in the dock.
  */
 @Composable
 fun Button.Companion.rememberImagesLibrary(
+    scope: ButtonScope =
+        LocalEditorScope.current.run {
+            remember(this) { ButtonScope(parentScope = this) }
+        },
+    visible: @Composable ButtonScope.() -> Boolean = alwaysVisible,
+    enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
+    exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
+    decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
     vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = { IconPack.AddImageForeground },
     text: (@Composable ButtonScope.() -> String)? = { stringResource(R.string.ly_img_editor_image) },
     tint: (@Composable ButtonScope.() -> Color)? = null,
@@ -703,28 +711,20 @@ fun Button.Companion.rememberImagesLibrary(
             ),
         )
     },
-    scope: ButtonScope =
-        LocalEditorScope.current.run {
-            remember(this) { ButtonScope(parentScope = this) }
-        },
-    visible: @Composable ButtonScope.() -> Boolean = alwaysVisible,
-    enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
-    exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
-    decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
     `_`: Nothing = nothing,
 ): Button =
     remember(
         id = Button.Id.imagesLibrary,
-        vectorIcon = vectorIcon,
-        text = text,
-        tint = tint,
-        enabled = enabled,
-        onClick = onClick,
         scope = scope,
         visible = visible,
         enterTransition = enterTransition,
         exitTransition = exitTransition,
         decoration = decoration,
+        vectorIcon = vectorIcon,
+        text = text,
+        tint = tint,
+        enabled = enabled,
+        onClick = onClick,
         `_` = `_`,
     )
 
@@ -739,17 +739,6 @@ val Button.Id.Companion.textLibrary by unsafeLazy {
  * A composable helper function that creates and remembers a [Dock.Button] that
  * opens a library sheet with text via [EditorEvent.Sheet.Open].
  *
- * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
- * Default value is always [IconPack.AddText].
- * @param text the text content of the button as a string. If null then text is not rendered.
- * Default value is always [R.string.ly_img_editor_text].
- * @param tint the tint color of the content. If null then no tint is applied.
- * Default value is null.
- * @param enabled whether the button is enabled.
- * Default value is always true.
- * @param onClick the callback that is invoked when the button is clicked.
- * By default [EditorEvent.Sheet.Open] event is invoked with sheet type [SheetType.LibraryAdd] and
- * [ly.img.editor.core.library.AssetLibrary.text] content is displayed on the sheet.
  * @param scope the scope of this component. Every new value will trigger recomposition of all the lambda parameters.
  * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
  * Consider using Compose [androidx.compose.runtime.State] objects in the lambdas for
@@ -765,10 +754,29 @@ val Button.Id.Companion.textLibrary by unsafeLazy {
  * Default value is always no exit transition.
  * @param decoration decoration of the button. Useful when you want to add custom background, foreground, shadow, paddings etc.
  * Default value is always no decoration.
+ * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
+ * Default value is always [IconPack.AddText].
+ * @param text the text content of the button as a string. If null then text is not rendered.
+ * Default value is always [R.string.ly_img_editor_text].
+ * @param tint the tint color of the content. If null then no tint is applied.
+ * Default value is null.
+ * @param enabled whether the button is enabled.
+ * Default value is always true.
+ * @param onClick the callback that is invoked when the button is clicked.
+ * By default [EditorEvent.Sheet.Open] event is invoked with sheet type [SheetType.LibraryAdd] and
+ * [ly.img.editor.core.library.AssetLibrary.text] content is displayed on the sheet.
  * @return a button that will be displayed in the dock.
  */
 @Composable
 fun Button.Companion.rememberTextLibrary(
+    scope: ButtonScope =
+        LocalEditorScope.current.run {
+            remember(this) { ButtonScope(parentScope = this) }
+        },
+    visible: @Composable ButtonScope.() -> Boolean = alwaysVisible,
+    enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
+    exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
+    decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
     vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = { IconPack.AddText },
     text: (@Composable ButtonScope.() -> String)? = { stringResource(R.string.ly_img_editor_text) },
     tint: (@Composable ButtonScope.() -> Color)? = null,
@@ -790,28 +798,20 @@ fun Button.Companion.rememberTextLibrary(
             ),
         )
     },
-    scope: ButtonScope =
-        LocalEditorScope.current.run {
-            remember(this) { ButtonScope(parentScope = this) }
-        },
-    visible: @Composable ButtonScope.() -> Boolean = alwaysVisible,
-    enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
-    exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
-    decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
     `_`: Nothing = nothing,
 ): Button =
     remember(
         id = Button.Id.textLibrary,
-        vectorIcon = vectorIcon,
-        text = text,
-        tint = tint,
-        enabled = enabled,
-        onClick = onClick,
         scope = scope,
         visible = visible,
         enterTransition = enterTransition,
         exitTransition = exitTransition,
         decoration = decoration,
+        vectorIcon = vectorIcon,
+        text = text,
+        tint = tint,
+        enabled = enabled,
+        onClick = onClick,
         `_` = `_`,
     )
 
@@ -826,17 +826,6 @@ val Button.Id.Companion.shapesLibrary by unsafeLazy {
  * A composable helper function that creates and remembers a [Dock.Button] that
  * opens a library sheet with shapes via [EditorEvent.Sheet.Open].
  *
- * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
- * Default value is always [IconPack.AddShape].
- * @param text the text content of the button as a string. If null then text is not rendered.
- * Default value is always [R.string.ly_img_editor_shape].
- * @param tint the tint color of the content. If null then no tint is applied.
- * Default value is null.
- * @param enabled whether the button is enabled.
- * Default value is always true.
- * @param onClick the callback that is invoked when the button is clicked.
- * By default [EditorEvent.Sheet.Open] event is invoked with sheet type [SheetType.LibraryAdd] and
- * [ly.img.editor.core.library.AssetLibrary.shapes] content is displayed on the sheet.
  * @param scope the scope of this component. Every new value will trigger recomposition of all the lambda parameters.
  * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
  * Consider using Compose [androidx.compose.runtime.State] objects in the lambdas for
@@ -852,10 +841,29 @@ val Button.Id.Companion.shapesLibrary by unsafeLazy {
  * Default value is always no exit transition.
  * @param decoration decoration of the button. Useful when you want to add custom background, foreground, shadow, paddings etc.
  * Default value is always no decoration.
+ * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
+ * Default value is always [IconPack.AddShape].
+ * @param text the text content of the button as a string. If null then text is not rendered.
+ * Default value is always [R.string.ly_img_editor_shape].
+ * @param tint the tint color of the content. If null then no tint is applied.
+ * Default value is null.
+ * @param enabled whether the button is enabled.
+ * Default value is always true.
+ * @param onClick the callback that is invoked when the button is clicked.
+ * By default [EditorEvent.Sheet.Open] event is invoked with sheet type [SheetType.LibraryAdd] and
+ * [ly.img.editor.core.library.AssetLibrary.shapes] content is displayed on the sheet.
  * @return a button that will be displayed in the dock.
  */
 @Composable
 fun Button.Companion.rememberShapesLibrary(
+    scope: ButtonScope =
+        LocalEditorScope.current.run {
+            remember(this) { ButtonScope(parentScope = this) }
+        },
+    visible: @Composable ButtonScope.() -> Boolean = alwaysVisible,
+    enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
+    exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
+    decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
     vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = { IconPack.AddShape },
     text: (@Composable ButtonScope.() -> String)? = { stringResource(R.string.ly_img_editor_shape) },
     tint: (@Composable ButtonScope.() -> Color)? = null,
@@ -870,28 +878,20 @@ fun Button.Companion.rememberShapesLibrary(
             ),
         )
     },
-    scope: ButtonScope =
-        LocalEditorScope.current.run {
-            remember(this) { ButtonScope(parentScope = this) }
-        },
-    visible: @Composable ButtonScope.() -> Boolean = alwaysVisible,
-    enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
-    exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
-    decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
     `_`: Nothing = nothing,
 ): Button =
     remember(
         id = Button.Id.shapesLibrary,
-        vectorIcon = vectorIcon,
-        text = text,
-        tint = tint,
-        enabled = enabled,
-        onClick = onClick,
         scope = scope,
         visible = visible,
         enterTransition = enterTransition,
         exitTransition = exitTransition,
         decoration = decoration,
+        vectorIcon = vectorIcon,
+        text = text,
+        tint = tint,
+        enabled = enabled,
+        onClick = onClick,
         `_` = `_`,
     )
 
@@ -906,17 +906,6 @@ val Button.Id.Companion.stickersLibrary by unsafeLazy {
  * A composable helper function that creates and remembers a [Dock.Button] that
  * opens a library sheet with stickers via [EditorEvent.Sheet.Open].
  *
- * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
- * Default value is always [IconPack.AddSticker].
- * @param text the text content of the button as a string. If null then text is not rendered.
- * Default value is always [R.string.ly_img_editor_sticker].
- * @param tint the tint color of the content. If null then no tint is applied.
- * Default value is null.
- * @param enabled whether the button is enabled.
- * Default value is always true.
- * @param onClick the callback that is invoked when the button is clicked.
- * By default [EditorEvent.Sheet.Open] event is invoked with sheet type [SheetType.LibraryAdd] and
- * [ly.img.editor.core.library.AssetLibrary.stickers] content is displayed on the sheet.
  * @param scope the scope of this component. Every new value will trigger recomposition of all the lambda parameters.
  * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
  * Consider using Compose [androidx.compose.runtime.State] objects in the lambdas for
@@ -932,10 +921,29 @@ val Button.Id.Companion.stickersLibrary by unsafeLazy {
  * Default value is always no exit transition.
  * @param decoration decoration of the button. Useful when you want to add custom background, foreground, shadow, paddings etc.
  * Default value is always no decoration.
+ * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
+ * Default value is always [IconPack.AddSticker].
+ * @param text the text content of the button as a string. If null then text is not rendered.
+ * Default value is always [R.string.ly_img_editor_sticker].
+ * @param tint the tint color of the content. If null then no tint is applied.
+ * Default value is null.
+ * @param enabled whether the button is enabled.
+ * Default value is always true.
+ * @param onClick the callback that is invoked when the button is clicked.
+ * By default [EditorEvent.Sheet.Open] event is invoked with sheet type [SheetType.LibraryAdd] and
+ * [ly.img.editor.core.library.AssetLibrary.stickers] content is displayed on the sheet.
  * @return a button that will be displayed in the dock.
  */
 @Composable
 fun Button.Companion.rememberStickersLibrary(
+    scope: ButtonScope =
+        LocalEditorScope.current.run {
+            remember(this) { ButtonScope(parentScope = this) }
+        },
+    visible: @Composable ButtonScope.() -> Boolean = alwaysVisible,
+    enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
+    exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
+    decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
     vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = { IconPack.AddSticker },
     text: (@Composable ButtonScope.() -> String)? = { stringResource(R.string.ly_img_editor_sticker) },
     tint: (@Composable ButtonScope.() -> Color)? = null,
@@ -950,28 +958,20 @@ fun Button.Companion.rememberStickersLibrary(
             ),
         )
     },
-    scope: ButtonScope =
-        LocalEditorScope.current.run {
-            remember(this) { ButtonScope(parentScope = this) }
-        },
-    visible: @Composable ButtonScope.() -> Boolean = alwaysVisible,
-    enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
-    exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
-    decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
     `_`: Nothing = nothing,
 ): Button =
     remember(
         id = Button.Id.stickersLibrary,
-        vectorIcon = vectorIcon,
-        text = text,
-        tint = tint,
-        enabled = enabled,
-        onClick = onClick,
         scope = scope,
         visible = visible,
         enterTransition = enterTransition,
         exitTransition = exitTransition,
         decoration = decoration,
+        vectorIcon = vectorIcon,
+        text = text,
+        tint = tint,
+        enabled = enabled,
+        onClick = onClick,
         `_` = `_`,
     )
 
@@ -986,17 +986,6 @@ val Button.Id.Companion.audiosLibrary by unsafeLazy {
  * A composable helper function that creates and remembers a [Dock.Button] that
  * opens a library sheet with audios via [EditorEvent.Sheet.Open].
  *
- * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
- * Default value is always [IconPack.AddAudio].
- * @param text the text content of the button as a string. If null then text is not rendered.
- * Default value is always [R.string.ly_img_editor_audio].
- * @param tint the tint color of the content. If null then no tint is applied.
- * Default value is null.
- * @param enabled whether the button is enabled.
- * Default value is always true.
- * @param onClick the callback that is invoked when the button is clicked.
- * By default [EditorEvent.Sheet.Open] event is invoked with sheet type [SheetType.LibraryAdd] and
- * [ly.img.editor.core.library.AssetLibrary.audios] content is displayed on the sheet.
  * @param scope the scope of this component. Every new value will trigger recomposition of all the lambda parameters.
  * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
  * Consider using Compose [androidx.compose.runtime.State] objects in the lambdas for
@@ -1012,10 +1001,29 @@ val Button.Id.Companion.audiosLibrary by unsafeLazy {
  * Default value is always no exit transition.
  * @param decoration decoration of the button. Useful when you want to add custom background, foreground, shadow, paddings etc.
  * Default value is always no decoration.
+ * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
+ * Default value is always [IconPack.AddAudio].
+ * @param text the text content of the button as a string. If null then text is not rendered.
+ * Default value is always [R.string.ly_img_editor_audio].
+ * @param tint the tint color of the content. If null then no tint is applied.
+ * Default value is null.
+ * @param enabled whether the button is enabled.
+ * Default value is always true.
+ * @param onClick the callback that is invoked when the button is clicked.
+ * By default [EditorEvent.Sheet.Open] event is invoked with sheet type [SheetType.LibraryAdd] and
+ * [ly.img.editor.core.library.AssetLibrary.audios] content is displayed on the sheet.
  * @return a button that will be displayed in the dock.
  */
 @Composable
 fun Button.Companion.rememberAudiosLibrary(
+    scope: ButtonScope =
+        LocalEditorScope.current.run {
+            remember(this) { ButtonScope(parentScope = this) }
+        },
+    visible: @Composable ButtonScope.() -> Boolean = alwaysVisible,
+    enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
+    exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
+    decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
     vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = { IconPack.AddAudio },
     text: (@Composable ButtonScope.() -> String)? = { stringResource(R.string.ly_img_editor_audio) },
     tint: (@Composable ButtonScope.() -> Color)? = null,
@@ -1030,28 +1038,20 @@ fun Button.Companion.rememberAudiosLibrary(
             ),
         )
     },
-    scope: ButtonScope =
-        LocalEditorScope.current.run {
-            remember(this) { ButtonScope(parentScope = this) }
-        },
-    visible: @Composable ButtonScope.() -> Boolean = alwaysVisible,
-    enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
-    exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
-    decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
     `_`: Nothing = nothing,
 ): Button =
     remember(
         id = Button.Id.audiosLibrary,
-        vectorIcon = vectorIcon,
-        text = text,
-        tint = tint,
-        enabled = enabled,
-        onClick = onClick,
         scope = scope,
         visible = visible,
         enterTransition = enterTransition,
         exitTransition = exitTransition,
         decoration = decoration,
+        vectorIcon = vectorIcon,
+        text = text,
+        tint = tint,
+        enabled = enabled,
+        onClick = onClick,
         `_` = `_`,
     )
 
@@ -1065,17 +1065,6 @@ val Button.Id.Companion.systemGallery by unsafeLazy {
 /**
  * A composable helper function that creates and remembers a [Dock.Button] that opens the system gallery via [EditorEvent.LaunchContract].
  *
- * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
- * Default value is always [IconPack.AddGalleryForeground].
- * @param text the text content of the button as a string. If null then text is not rendered.
- * Default value is always [R.string.ly_img_editor_gallery].
- * @param tint the tint color of the content. If null then no tint is applied.
- * Default value is null.
- * @param enabled whether the button is enabled.
- * Default value is always true.
- * @param onClick the callback that is invoked when the button is clicked.
- * By default [EditorEvent.LaunchContract] event is invoked with [ActivityResultContracts.PickVisualMedia] contract.
- * If the editor has a video scene, then both images and videos are allowed to be picked, if not then only images.
  * @param scope the scope of this component. Every new value will trigger recomposition of all the lambda parameters.
  * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
  * Consider using Compose [androidx.compose.runtime.State] objects in the lambdas for
@@ -1091,10 +1080,29 @@ val Button.Id.Companion.systemGallery by unsafeLazy {
  * Default value is always no exit transition.
  * @param decoration decoration of the button. Useful when you want to add custom background, foreground, shadow, paddings etc.
  * Default value is always no decoration.
+ * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
+ * Default value is always [IconPack.AddGalleryForeground].
+ * @param text the text content of the button as a string. If null then text is not rendered.
+ * Default value is always [R.string.ly_img_editor_gallery].
+ * @param tint the tint color of the content. If null then no tint is applied.
+ * Default value is null.
+ * @param enabled whether the button is enabled.
+ * Default value is always true.
+ * @param onClick the callback that is invoked when the button is clicked.
+ * By default [EditorEvent.LaunchContract] event is invoked with [ActivityResultContracts.PickVisualMedia] contract.
+ * If the editor has a video scene, then both images and videos are allowed to be picked, if not then only images.
  * @return a button that will be displayed in the dock.
  */
 @Composable
 fun Button.Companion.rememberSystemGallery(
+    scope: ButtonScope =
+        LocalEditorScope.current.run {
+            remember(this) { ButtonScope(parentScope = this) }
+        },
+    visible: @Composable ButtonScope.() -> Boolean = alwaysVisible,
+    enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
+    exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
+    decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
     vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = {
         if (editorContext.engine.scene.getMode() == SceneMode.VIDEO) {
             IconPack.AddGalleryBackground
@@ -1129,28 +1137,20 @@ fun Button.Companion.rememberSystemGallery(
             }
         editorContext.eventHandler.send(event)
     },
-    scope: ButtonScope =
-        LocalEditorScope.current.run {
-            remember(this) { ButtonScope(parentScope = this) }
-        },
-    visible: @Composable ButtonScope.() -> Boolean = alwaysVisible,
-    enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
-    exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
-    decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
     `_`: Nothing = nothing,
 ): Button =
     remember(
         id = Button.Id.systemGallery,
-        vectorIcon = vectorIcon,
-        text = text,
-        tint = tint,
-        enabled = enabled,
-        onClick = onClick,
         scope = scope,
         visible = visible,
         enterTransition = enterTransition,
         exitTransition = exitTransition,
         decoration = decoration,
+        vectorIcon = vectorIcon,
+        text = text,
+        tint = tint,
+        enabled = enabled,
+        onClick = onClick,
         `_` = `_`,
     )
 
@@ -1164,20 +1164,6 @@ val Button.Id.Companion.systemCamera by unsafeLazy {
 /**
  * A composable helper function that creates and remembers a [Dock.Button] that opens the system camera via [EditorEvent.LaunchContract].
  *
- * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
- * Default value is always [IconPack.AddCameraForeground].
- * @param text the text content of the button as a string. If null then text is not rendered.
- * Default value is always [R.string.ly_img_editor_camera].
- * @param tint the tint color of the content. If null then no tint is applied.
- * Default value is null.
- * @param enabled whether the button is enabled.
- * Default value is always true.
- * @param onClick the callback that is invoked when the button is clicked.
- * By default [EditorEvent.LaunchContract] event is invoked with [ActivityResultContracts.CaptureVideo] contract when the editor
- * is a video scene and [ActivityResultContracts.TakePicture] when it is not.
- * The image/video is stored in the local files dir. After returning to the editor, the uri is added to the scene via
- * [EditorEvent.AddUriToScene] event and is converted to an asset and stored in [AssetSourceType.ImageUploads] or
- * [AssetSourceType.VideoUploads] depending on the type of the content.
  * @param scope the scope of this component. Every new value will trigger recomposition of all the lambda parameters.
  * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
  * Consider using Compose [androidx.compose.runtime.State] objects in the lambdas for
@@ -1193,10 +1179,32 @@ val Button.Id.Companion.systemCamera by unsafeLazy {
  * Default value is always no exit transition.
  * @param decoration decoration of the button. Useful when you want to add custom background, foreground, shadow, paddings etc.
  * Default value is always no decoration.
+ * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
+ * Default value is always [IconPack.AddCameraForeground].
+ * @param text the text content of the button as a string. If null then text is not rendered.
+ * Default value is always [R.string.ly_img_editor_camera].
+ * @param tint the tint color of the content. If null then no tint is applied.
+ * Default value is null.
+ * @param enabled whether the button is enabled.
+ * Default value is always true.
+ * @param onClick the callback that is invoked when the button is clicked.
+ * By default [EditorEvent.LaunchContract] event is invoked with [ActivityResultContracts.CaptureVideo] contract when the editor
+ * is a video scene and [ActivityResultContracts.TakePicture] when it is not.
+ * The image/video is stored in the local files dir. After returning to the editor, the uri is added to the scene via
+ * [EditorEvent.AddUriToScene] event and is converted to an asset and stored in [AssetSourceType.ImageUploads] or
+ * [AssetSourceType.VideoUploads] depending on the type of the content.
  * @return a button that will be displayed in the dock.
  */
 @Composable
 fun Button.Companion.rememberSystemCamera(
+    scope: ButtonScope =
+        LocalEditorScope.current.run {
+            remember(this) { ButtonScope(parentScope = this) }
+        },
+    visible: @Composable ButtonScope.() -> Boolean = alwaysVisible,
+    enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
+    exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
+    decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
     vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = {
         if (editorContext.engine.scene.getMode() == SceneMode.VIDEO) {
             IconPack.AddCameraBackground
@@ -1234,28 +1242,20 @@ fun Button.Companion.rememberSystemCamera(
             }
         editorContext.eventHandler.send(event)
     },
-    scope: ButtonScope =
-        LocalEditorScope.current.run {
-            remember(this) { ButtonScope(parentScope = this) }
-        },
-    visible: @Composable ButtonScope.() -> Boolean = alwaysVisible,
-    enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
-    exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
-    decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
     `_`: Nothing = nothing,
 ): Button =
     remember(
         id = Button.Id.systemCamera,
-        vectorIcon = vectorIcon,
-        text = text,
-        tint = tint,
-        enabled = enabled,
-        onClick = onClick,
         scope = scope,
         visible = visible,
         enterTransition = enterTransition,
         exitTransition = exitTransition,
         decoration = decoration,
+        vectorIcon = vectorIcon,
+        text = text,
+        tint = tint,
+        enabled = enabled,
+        onClick = onClick,
         `_` = `_`,
     )
 
@@ -1271,16 +1271,6 @@ val Button.Id.Companion.imglyCamera by unsafeLazy {
  * IMPORTANT: Make sure your app has the dependency of ly.img:camera:<version> next to the ly.img:editor:<version> dependency.
  * Also make sure that their versions match. Failing to provide the dependency will result to a crash.
  *
- * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
- * Default value is always [IconPack.AddCameraForeground].
- * @param text the text content of the button as a string. If null then text is not rendered.
- * Default value is always [R.string.ly_img_editor_camera].
- * @param tint the tint color of the content. If null then no tint is applied.
- * Default value is null.
- * @param enabled whether the button is enabled.
- * Default value is always true.
- * @param onClick the callback that is invoked when the button is clicked.
- * By default [EditorEvent.LaunchContract] event is invoked with [CaptureVideo] contract.
  * @param scope the scope of this component. Every new value will trigger recomposition of all the lambda parameters.
  * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
  * Consider using Compose [androidx.compose.runtime.State] objects in the lambdas for
@@ -1296,10 +1286,28 @@ val Button.Id.Companion.imglyCamera by unsafeLazy {
  * Default value is always no exit transition.
  * @param decoration decoration of the button. Useful when you want to add custom background, foreground, shadow, paddings etc.
  * Default value is always no decoration.
+ * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
+ * Default value is always [IconPack.AddCameraForeground].
+ * @param text the text content of the button as a string. If null then text is not rendered.
+ * Default value is always [R.string.ly_img_editor_camera].
+ * @param tint the tint color of the content. If null then no tint is applied.
+ * Default value is null.
+ * @param enabled whether the button is enabled.
+ * Default value is always true.
+ * @param onClick the callback that is invoked when the button is clicked.
+ * By default [EditorEvent.LaunchContract] event is invoked with [CaptureVideo] contract.
  * @return a button that will be displayed in the dock.
  */
 @Composable
 fun Button.Companion.rememberImglyCamera(
+    scope: ButtonScope =
+        LocalEditorScope.current.run {
+            remember(this) { ButtonScope(parentScope = this) }
+        },
+    visible: @Composable ButtonScope.() -> Boolean = alwaysVisible,
+    enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
+    exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
+    decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
     vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = { IconPack.AddCameraBackground },
     text: (@Composable ButtonScope.() -> String)? = { stringResource(R.string.ly_img_editor_camera) },
     tint: (@Composable ButtonScope.() -> Color)? = null,
@@ -1331,28 +1339,20 @@ fun Button.Companion.rememberImglyCamera(
             },
         ).let { editorContext.eventHandler.send(it) }
     },
-    scope: ButtonScope =
-        LocalEditorScope.current.run {
-            remember(this) { ButtonScope(parentScope = this) }
-        },
-    visible: @Composable ButtonScope.() -> Boolean = alwaysVisible,
-    enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
-    exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
-    decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
     `_`: Nothing = nothing,
 ): Button =
     remember(
         id = Button.Id.imglyCamera,
-        vectorIcon = vectorIcon,
-        text = text,
-        tint = tint,
-        enabled = enabled,
-        onClick = onClick,
         scope = scope,
         visible = visible,
         enterTransition = enterTransition,
         exitTransition = exitTransition,
         decoration = decoration,
+        vectorIcon = vectorIcon,
+        text = text,
+        tint = tint,
+        enabled = enabled,
+        onClick = onClick,
         `_` = `_`,
     )
 
@@ -1367,16 +1367,6 @@ val Button.Id.Companion.reorder by unsafeLazy {
  * A composable helper function that creates and remembers a [Dock.Button] that
  * opens reorder sheet via [EditorEvent.Sheet.Open].
  *
- * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
- * Default value is always [IconPack.ReorderHorizontally].
- * @param text the text content of the button as a string. If null then text is not rendered.
- * Default value is always [R.string.ly_img_editor_reorder].
- * @param tint the tint color of the content. If null then no tint is applied.
- * Default value is null.
- * @param enabled whether the button is enabled.
- * Default value is always true.
- * @param onClick the callback that is invoked when the button is clicked.
- * By default [EditorEvent.Sheet.Open] is invoked with sheet type [SheetType.Reorder].
  * @param scope the scope of this component. Every new value will trigger recomposition of all the lambda parameters.
  * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
  * Consider using Compose [androidx.compose.runtime.State] objects in the lambdas for
@@ -1393,17 +1383,20 @@ val Button.Id.Companion.reorder by unsafeLazy {
  * Default value is always no exit transition.
  * @param decoration decoration of the button. Useful when you want to add custom background, foreground, shadow, paddings etc.
  * Default value is always no decoration.
+ * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
+ * Default value is always [IconPack.ReorderHorizontally].
+ * @param text the text content of the button as a string. If null then text is not rendered.
+ * Default value is always [R.string.ly_img_editor_reorder].
+ * @param tint the tint color of the content. If null then no tint is applied.
+ * Default value is null.
+ * @param enabled whether the button is enabled.
+ * Default value is always true.
+ * @param onClick the callback that is invoked when the button is clicked.
+ * By default [EditorEvent.Sheet.Open] is invoked with sheet type [SheetType.Reorder].
  * @return a button that will be displayed in the dock.
  */
 @Composable
 fun Button.Companion.rememberReorder(
-    vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = { IconPack.ReorderHorizontally },
-    text: (@Composable ButtonScope.() -> String)? = { stringResource(R.string.ly_img_editor_reorder) },
-    tint: (@Composable ButtonScope.() -> Color)? = null,
-    enabled: @Composable ButtonScope.() -> Boolean = alwaysEnabled,
-    onClick: ButtonScope.() -> Unit = {
-        editorContext.eventHandler.send(EditorEvent.Sheet.Open(SheetType.Reorder()))
-    },
     scope: ButtonScope =
         LocalEditorScope.current.run {
             remember(this) { ButtonScope(parentScope = this) }
@@ -1421,20 +1414,27 @@ fun Button.Companion.rememberReorder(
     enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
     exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
     decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
+    vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = { IconPack.ReorderHorizontally },
+    text: (@Composable ButtonScope.() -> String)? = { stringResource(R.string.ly_img_editor_reorder) },
+    tint: (@Composable ButtonScope.() -> Color)? = null,
+    enabled: @Composable ButtonScope.() -> Boolean = alwaysEnabled,
+    onClick: ButtonScope.() -> Unit = {
+        editorContext.eventHandler.send(EditorEvent.Sheet.Open(SheetType.Reorder()))
+    },
     `_`: Nothing = nothing,
 ): Button =
     remember(
         id = Button.Id.reorder,
-        vectorIcon = vectorIcon,
-        text = text,
-        tint = tint,
-        enabled = enabled,
-        onClick = onClick,
         scope = scope,
         visible = visible,
         enterTransition = enterTransition,
         exitTransition = exitTransition,
         decoration = decoration,
+        vectorIcon = vectorIcon,
+        text = text,
+        tint = tint,
+        enabled = enabled,
+        onClick = onClick,
         `_` = `_`,
     )
 
@@ -1449,16 +1449,6 @@ val Button.Id.Companion.adjustments by unsafeLazy {
  * A composable helper function that creates and remembers a [Dock.Button] that opens adjustments sheet for the current page via
  * [EditorEvent.Sheet.Open].
  *
- * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
- * Default value is always [IconPack.Adjustments].
- * @param text the text content of the button as a string. If null then text is not rendered.
- * Default value is is always [R.string.ly_img_editor_adjustments].
- * @param tint the tint color of the content. If null then no tint is applied.
- * Default value is null.
- * @param enabled whether the button is enabled.
- * Default value is always true.
- * @param onClick the callback that is invoked when the button is clicked.
- * By default [EditorEvent.Sheet.Open] is invoked with sheet type [SheetType.Adjustments].
  * @param scope the scope of this component. Every new value will trigger recomposition of all the lambda parameters.
  * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
  * Consider using Compose [androidx.compose.runtime.State] objects in the lambdas for
@@ -1474,17 +1464,20 @@ val Button.Id.Companion.adjustments by unsafeLazy {
  * Default value is always no exit transition.
  * @param decoration decoration of the button. Useful when you want to add custom background, foreground, shadow, paddings etc.
  * Default value is always no decoration.
+ * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
+ * Default value is always [IconPack.Adjustments].
+ * @param text the text content of the button as a string. If null then text is not rendered.
+ * Default value is is always [R.string.ly_img_editor_adjustments].
+ * @param tint the tint color of the content. If null then no tint is applied.
+ * Default value is null.
+ * @param enabled whether the button is enabled.
+ * Default value is always true.
+ * @param onClick the callback that is invoked when the button is clicked.
+ * By default [EditorEvent.Sheet.Open] is invoked with sheet type [SheetType.Adjustments].
  * @return a button that will be displayed in the dock.
  */
 @Composable
 fun Button.Companion.rememberAdjustments(
-    vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = { IconPack.Adjustments },
-    text: (@Composable ButtonScope.() -> String)? = { stringResource(R.string.ly_img_editor_adjustments) },
-    tint: (@Composable ButtonScope.() -> Color)? = null,
-    enabled: @Composable ButtonScope.() -> Boolean = alwaysEnabled,
-    onClick: ButtonScope.() -> Unit = {
-        editorContext.eventHandler.send(EditorEvent.Sheet.Open(SheetType.Adjustments()))
-    },
     scope: ButtonScope =
         LocalEditorScope.current.run {
             remember(this) { ButtonScope(parentScope = this) }
@@ -1498,20 +1491,27 @@ fun Button.Companion.rememberAdjustments(
     enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
     exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
     decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
+    vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = { IconPack.Adjustments },
+    text: (@Composable ButtonScope.() -> String)? = { stringResource(R.string.ly_img_editor_adjustments) },
+    tint: (@Composable ButtonScope.() -> Color)? = null,
+    enabled: @Composable ButtonScope.() -> Boolean = alwaysEnabled,
+    onClick: ButtonScope.() -> Unit = {
+        editorContext.eventHandler.send(EditorEvent.Sheet.Open(SheetType.Adjustments()))
+    },
     `_`: Nothing = nothing,
 ): Button =
     remember(
         id = Button.Id.adjustments,
-        vectorIcon = vectorIcon,
-        text = text,
-        tint = tint,
-        enabled = enabled,
-        onClick = onClick,
         scope = scope,
         visible = visible,
         enterTransition = enterTransition,
         exitTransition = exitTransition,
         decoration = decoration,
+        vectorIcon = vectorIcon,
+        text = text,
+        tint = tint,
+        enabled = enabled,
+        onClick = onClick,
         `_` = `_`,
     )
 
@@ -1526,16 +1526,6 @@ val Button.Id.Companion.filter by unsafeLazy {
  * A composable helper function that creates and remembers a [Dock.Button] that opens filter sheet for the current page via
  * [EditorEvent.Sheet.Open].
  *
- * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
- * Default value is always [IconPack.Filter].
- * @param text the text content of the button as a string. If null then text is not rendered.
- * Default value is is always [R.string.ly_img_editor_filter].
- * @param tint the tint color of the content. If null then no tint is applied.
- * Default value is null.
- * @param enabled whether the button is enabled.
- * Default value is always true.
- * @param onClick the callback that is invoked when the button is clicked.
- * By default [EditorEvent.Sheet.Open] is invoked with sheet type [SheetType.Filter].
  * @param scope the scope of this component. Every new value will trigger recomposition of all the lambda parameters.
  * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
  * Consider using Compose [androidx.compose.runtime.State] objects in the lambdas for
@@ -1551,17 +1541,20 @@ val Button.Id.Companion.filter by unsafeLazy {
  * Default value is always no exit transition.
  * @param decoration decoration of the button. Useful when you want to add custom background, foreground, shadow, paddings etc.
  * Default value is always no decoration.
+ * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
+ * Default value is always [IconPack.Filter].
+ * @param text the text content of the button as a string. If null then text is not rendered.
+ * Default value is is always [R.string.ly_img_editor_filter].
+ * @param tint the tint color of the content. If null then no tint is applied.
+ * Default value is null.
+ * @param enabled whether the button is enabled.
+ * Default value is always true.
+ * @param onClick the callback that is invoked when the button is clicked.
+ * By default [EditorEvent.Sheet.Open] is invoked with sheet type [SheetType.Filter].
  * @return a button that will be displayed in the dock.
  */
 @Composable
 fun Button.Companion.rememberFilter(
-    vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = { IconPack.Filter },
-    text: (@Composable ButtonScope.() -> String)? = { stringResource(R.string.ly_img_editor_filter) },
-    tint: (@Composable ButtonScope.() -> Color)? = null,
-    enabled: @Composable ButtonScope.() -> Boolean = alwaysEnabled,
-    onClick: ButtonScope.() -> Unit = {
-        editorContext.eventHandler.send(EditorEvent.Sheet.Open(SheetType.Filter()))
-    },
     scope: ButtonScope =
         LocalEditorScope.current.run {
             remember(this) { ButtonScope(parentScope = this) }
@@ -1575,20 +1568,27 @@ fun Button.Companion.rememberFilter(
     enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
     exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
     decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
+    vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = { IconPack.Filter },
+    text: (@Composable ButtonScope.() -> String)? = { stringResource(R.string.ly_img_editor_filter) },
+    tint: (@Composable ButtonScope.() -> Color)? = null,
+    enabled: @Composable ButtonScope.() -> Boolean = alwaysEnabled,
+    onClick: ButtonScope.() -> Unit = {
+        editorContext.eventHandler.send(EditorEvent.Sheet.Open(SheetType.Filter()))
+    },
     `_`: Nothing = nothing,
 ): Button =
     remember(
         id = Button.Id.filter,
-        vectorIcon = vectorIcon,
-        text = text,
-        tint = tint,
-        enabled = enabled,
-        onClick = onClick,
         scope = scope,
         visible = visible,
         enterTransition = enterTransition,
         exitTransition = exitTransition,
         decoration = decoration,
+        vectorIcon = vectorIcon,
+        text = text,
+        tint = tint,
+        enabled = enabled,
+        onClick = onClick,
         `_` = `_`,
     )
 
@@ -1603,16 +1603,6 @@ val Button.Id.Companion.effect by unsafeLazy {
  * A composable helper function that creates and remembers a [Dock.Button] that opens effect sheet for the current page via
  * [EditorEvent.Sheet.Open].
  *
- * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
- * Default value is always [IconPack.Effect].
- * @param text the text content of the button as a string. If null then text is not rendered.
- * Default value is is always [R.string.ly_img_editor_effect].
- * @param tint the tint color of the content. If null then no tint is applied.
- * Default value is null.
- * @param enabled whether the button is enabled.
- * Default value is always true.
- * @param onClick the callback that is invoked when the button is clicked.
- * By default [EditorEvent.Sheet.Open] is invoked with sheet type [SheetType.Effect].
  * @param scope the scope of this component. Every new value will trigger recomposition of all the lambda parameters.
  * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
  * Consider using Compose [androidx.compose.runtime.State] objects in the lambdas for
@@ -1628,17 +1618,20 @@ val Button.Id.Companion.effect by unsafeLazy {
  * Default value is always no exit transition.
  * @param decoration decoration of the button. Useful when you want to add custom background, foreground, shadow, paddings etc.
  * Default value is always no decoration.
+ * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
+ * Default value is always [IconPack.Effect].
+ * @param text the text content of the button as a string. If null then text is not rendered.
+ * Default value is is always [R.string.ly_img_editor_effect].
+ * @param tint the tint color of the content. If null then no tint is applied.
+ * Default value is null.
+ * @param enabled whether the button is enabled.
+ * Default value is always true.
+ * @param onClick the callback that is invoked when the button is clicked.
+ * By default [EditorEvent.Sheet.Open] is invoked with sheet type [SheetType.Effect].
  * @return a button that will be displayed in the dock.
  */
 @Composable
 fun Button.Companion.rememberEffect(
-    vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = { IconPack.Effect },
-    text: (@Composable ButtonScope.() -> String)? = { stringResource(R.string.ly_img_editor_effect) },
-    tint: (@Composable ButtonScope.() -> Color)? = null,
-    enabled: @Composable ButtonScope.() -> Boolean = alwaysEnabled,
-    onClick: ButtonScope.() -> Unit = {
-        editorContext.eventHandler.send(EditorEvent.Sheet.Open(SheetType.Effect()))
-    },
     scope: ButtonScope =
         LocalEditorScope.current.run {
             remember(this) { ButtonScope(parentScope = this) }
@@ -1652,20 +1645,27 @@ fun Button.Companion.rememberEffect(
     enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
     exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
     decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
+    vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = { IconPack.Effect },
+    text: (@Composable ButtonScope.() -> String)? = { stringResource(R.string.ly_img_editor_effect) },
+    tint: (@Composable ButtonScope.() -> Color)? = null,
+    enabled: @Composable ButtonScope.() -> Boolean = alwaysEnabled,
+    onClick: ButtonScope.() -> Unit = {
+        editorContext.eventHandler.send(EditorEvent.Sheet.Open(SheetType.Effect()))
+    },
     `_`: Nothing = nothing,
 ): Button =
     remember(
         id = Button.Id.effect,
-        vectorIcon = vectorIcon,
-        text = text,
-        tint = tint,
-        enabled = enabled,
-        onClick = onClick,
         scope = scope,
         visible = visible,
         enterTransition = enterTransition,
         exitTransition = exitTransition,
         decoration = decoration,
+        vectorIcon = vectorIcon,
+        text = text,
+        tint = tint,
+        enabled = enabled,
+        onClick = onClick,
         `_` = `_`,
     )
 
@@ -1680,16 +1680,6 @@ val Button.Id.Companion.blur by unsafeLazy {
  * A composable helper function that creates and remembers a [Dock.Button] that opens blur sheet for the current page via
  * [EditorEvent.Sheet.Open].
  *
- * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
- * Default value is always [IconPack.Blur].
- * @param text the text content of the button as a string. If null then text is not rendered.
- * Default value is is always [R.string.ly_img_editor_blur].
- * @param tint the tint color of the content. If null then no tint is applied.
- * Default value is null.
- * @param enabled whether the button is enabled.
- * Default value is always true.
- * @param onClick the callback that is invoked when the button is clicked.
- * By default [EditorEvent.Sheet.Open] is invoked with sheet type [SheetType.Blur].
  * @param scope the scope of this component. Every new value will trigger recomposition of all the lambda parameters.
  * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
  * Consider using Compose [androidx.compose.runtime.State] objects in the lambdas for
@@ -1705,17 +1695,20 @@ val Button.Id.Companion.blur by unsafeLazy {
  * Default value is always no exit transition.
  * @param decoration decoration of the button. Useful when you want to add custom background, foreground, shadow, paddings etc.
  * Default value is always no decoration.
+ * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
+ * Default value is always [IconPack.Blur].
+ * @param text the text content of the button as a string. If null then text is not rendered.
+ * Default value is is always [R.string.ly_img_editor_blur].
+ * @param tint the tint color of the content. If null then no tint is applied.
+ * Default value is null.
+ * @param enabled whether the button is enabled.
+ * Default value is always true.
+ * @param onClick the callback that is invoked when the button is clicked.
+ * By default [EditorEvent.Sheet.Open] is invoked with sheet type [SheetType.Blur].
  * @return a button that will be displayed in the dock.
  */
 @Composable
 fun Button.Companion.rememberBlur(
-    vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = { IconPack.Blur },
-    text: (@Composable ButtonScope.() -> String)? = { stringResource(R.string.ly_img_editor_blur) },
-    tint: (@Composable ButtonScope.() -> Color)? = null,
-    enabled: @Composable ButtonScope.() -> Boolean = alwaysEnabled,
-    onClick: ButtonScope.() -> Unit = {
-        editorContext.eventHandler.send(EditorEvent.Sheet.Open(SheetType.Blur()))
-    },
     scope: ButtonScope =
         LocalEditorScope.current.run {
             remember(this) { ButtonScope(parentScope = this) }
@@ -1729,20 +1722,27 @@ fun Button.Companion.rememberBlur(
     enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
     exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
     decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
+    vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = { IconPack.Blur },
+    text: (@Composable ButtonScope.() -> String)? = { stringResource(R.string.ly_img_editor_blur) },
+    tint: (@Composable ButtonScope.() -> Color)? = null,
+    enabled: @Composable ButtonScope.() -> Boolean = alwaysEnabled,
+    onClick: ButtonScope.() -> Unit = {
+        editorContext.eventHandler.send(EditorEvent.Sheet.Open(SheetType.Blur()))
+    },
     `_`: Nothing = nothing,
 ): Button =
     remember(
         id = Button.Id.blur,
-        vectorIcon = vectorIcon,
-        text = text,
-        tint = tint,
-        enabled = enabled,
-        onClick = onClick,
         scope = scope,
         visible = visible,
         enterTransition = enterTransition,
         exitTransition = exitTransition,
         decoration = decoration,
+        vectorIcon = vectorIcon,
+        text = text,
+        tint = tint,
+        enabled = enabled,
+        onClick = onClick,
         `_` = `_`,
     )
 
@@ -1757,16 +1757,6 @@ val Button.Id.Companion.crop by unsafeLazy {
  * A composable helper function that creates and remembers a [Dock.Button] that opens crop sheet for the current page via
  * [EditorEvent.Sheet.Open].
  *
- * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
- * Default value is always [IconPack.CropRotate].
- * @param text the text content of the button as a string. If null then text is not rendered.
- * Default value is is always [R.string.ly_img_editor_crop].
- * @param tint the tint color of the content. If null then no tint is applied.
- * Default value is null.
- * @param enabled whether the button is enabled.
- * Default value is always true.
- * @param onClick the callback that is invoked when the button is clicked.
- * By default [EditorEvent.Sheet.Open] is invoked with sheet type [SheetType.Crop].
  * @param scope the scope of this component. Every new value will trigger recomposition of all the lambda parameters.
  * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
  * Consider using Compose [androidx.compose.runtime.State] objects in the lambdas for
@@ -1783,17 +1773,20 @@ val Button.Id.Companion.crop by unsafeLazy {
  * Default value is always no exit transition.
  * @param decoration decoration of the button. Useful when you want to add custom background, foreground, shadow, paddings etc.
  * Default value is always no decoration.
+ * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
+ * Default value is always [IconPack.CropRotate].
+ * @param text the text content of the button as a string. If null then text is not rendered.
+ * Default value is is always [R.string.ly_img_editor_crop].
+ * @param tint the tint color of the content. If null then no tint is applied.
+ * Default value is null.
+ * @param enabled whether the button is enabled.
+ * Default value is always true.
+ * @param onClick the callback that is invoked when the button is clicked.
+ * By default [EditorEvent.Sheet.Open] is invoked with sheet type [SheetType.Crop].
  * @return a button that will be displayed in the dock.
  */
 @Composable
 fun Button.Companion.rememberCrop(
-    vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = { IconPack.CropRotate },
-    text: (@Composable ButtonScope.() -> String)? = { stringResource(R.string.ly_img_editor_crop) },
-    tint: (@Composable ButtonScope.() -> Color)? = null,
-    enabled: @Composable ButtonScope.() -> Boolean = alwaysEnabled,
-    onClick: ButtonScope.() -> Unit = {
-        editorContext.eventHandler.send(EditorEvent.Sheet.Open(SheetType.Crop()))
-    },
     scope: ButtonScope =
         LocalEditorScope.current.run {
             remember(this) { ButtonScope(parentScope = this) }
@@ -1808,19 +1801,26 @@ fun Button.Companion.rememberCrop(
     enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
     exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
     decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
+    vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = { IconPack.CropRotate },
+    text: (@Composable ButtonScope.() -> String)? = { stringResource(R.string.ly_img_editor_crop) },
+    tint: (@Composable ButtonScope.() -> Color)? = null,
+    enabled: @Composable ButtonScope.() -> Boolean = alwaysEnabled,
+    onClick: ButtonScope.() -> Unit = {
+        editorContext.eventHandler.send(EditorEvent.Sheet.Open(SheetType.Crop()))
+    },
     `_`: Nothing = nothing,
 ): Button =
     remember(
         id = Button.Id.crop,
-        vectorIcon = vectorIcon,
-        text = text,
-        tint = tint,
-        enabled = enabled,
-        onClick = onClick,
         scope = scope,
         visible = visible,
         enterTransition = enterTransition,
         exitTransition = exitTransition,
         decoration = decoration,
+        vectorIcon = vectorIcon,
+        text = text,
+        tint = tint,
+        enabled = enabled,
+        onClick = onClick,
         `_` = `_`,
     )

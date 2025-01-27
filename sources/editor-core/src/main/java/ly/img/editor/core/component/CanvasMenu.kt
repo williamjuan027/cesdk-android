@@ -3,104 +3,86 @@ package ly.img.editor.core.component
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisallowComposableCalls
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import ly.img.editor.core.EditorContext
 import ly.img.editor.core.EditorScope
 import ly.img.editor.core.LocalEditorScope
-import ly.img.editor.core.R
+import ly.img.editor.core.component.CanvasMenu.Companion.remember
 import ly.img.editor.core.component.EditorComponent.ListBuilder.Companion.modify
-import ly.img.editor.core.component.InspectorBar.Companion.remember
-import ly.img.editor.core.component.InspectorBar.Item
-import ly.img.editor.core.component.data.EditorIcon
 import ly.img.editor.core.component.data.Nothing
 import ly.img.editor.core.component.data.Selection
 import ly.img.editor.core.component.data.nothing
-import ly.img.editor.core.iconpack.Close
-import ly.img.editor.core.iconpack.IconPack
 import ly.img.editor.core.ui.IconTextButton
+import ly.img.editor.core.ui.toPx
 import ly.img.engine.DesignBlock
-import ly.img.engine.Engine
+import ly.img.engine.DesignBlockType
+import kotlin.math.cos
+import kotlin.math.roundToInt
 
 /**
- * A component for rendering the inspector bar at the bottom of the editor.
+ * A component for rendering the canvas menu next to a design block when it is selected.
  * Use [remember] from the companion object to create an instance of this class.
  *
  * @param scope the scope of this component. Every new value will trigger recomposition of all functions with
  * signature @Composable Scope.() -> {}.
- * @param visible whether the inspector bar should be visible based on the [Engine]'s current state.
- * @param enterTransition transition of the inspector bar when it enters the parent composable.
- * @param exitTransition transition of the inspector bar when it exits the parent composable.
- * @param decoration decoration of the inspector bar. Useful when you want to add custom background, foreground, shadow, paddings etc.
- * @param listBuilder the list builder of this inspector bar.
- * @param horizontalArrangement the horizontal arrangement that should be used to render the items in the inspector bar horizontally.
- * @param itemsRowEnterTransition separate transition of the [Item]s row only when [enterTransition] is running.
- * @param itemsRowExitTransition separate transition of the [Item]s row only when [exitTransition] is running.
- * @param itemDecoration decoration of the items in the inspector bar. Useful when you want to add custom background, foreground, shadow,
+ * @param visible whether the canvas menu should be visible.
+ * @param enterTransition transition of the canvas menu when it enters the parent composable.
+ * @param exitTransition transition of the canvas menu when it exits the parent composable.
+ * @param decoration decoration of the canvas menu. Useful when you want to add custom background, foreground, shadow, paddings etc.
+ * @param listBuilder the list builder of this canvas menu.
+ * @param itemDecoration decoration of the items in the canvas menu. Useful when you want to add custom background, foreground, shadow,
  * paddings etc to the items. Prefer using this decoration when you want to apply the same decoration to all the items, otherwise
  * set decoration to individual items.
  */
 @Stable
-class InspectorBar private constructor(
+class CanvasMenu private constructor(
     override val scope: Scope,
     override val visible: @Composable Scope.() -> Boolean,
     override val enterTransition: @Composable Scope.() -> EnterTransition,
     override val exitTransition: @Composable Scope.() -> ExitTransition,
     override val decoration: @Composable Scope.(content: @Composable () -> Unit) -> Unit,
     val listBuilder: EditorComponent.ListBuilder<Item<*>>,
-    val horizontalArrangement: @Composable Scope.() -> Arrangement.Horizontal,
-    val itemsRowEnterTransition: @Composable Scope.() -> EnterTransition,
-    val itemsRowExitTransition: @Composable Scope.() -> ExitTransition,
     val itemDecoration: @Composable Scope.(content: @Composable () -> Unit) -> Unit,
     private val `_`: Nothing = nothing,
-) : EditorComponent<InspectorBar.Scope>() {
-    override val id: EditorComponentId = EditorComponentId("ly.img.component.inspectorBar")
+) : EditorComponent<CanvasMenu.Scope>() {
+    override val id: EditorComponentId = EditorComponentId("ly.img.component.canvasMenu")
 
     @Stable
     class ListBuilder {
@@ -113,26 +95,11 @@ class InspectorBar private constructor(
             @Composable
             fun remember(): EditorComponent.ListBuilder<Item<*>> =
                 EditorComponent.ListBuilder.remember {
-                    add { Button.rememberReplace() } // Video, Image, Sticker, Audio
-                    add { Button.rememberEditText() } // Text
-                    add { Button.rememberFormatText() } // Text
-                    add { Button.rememberFillStroke() } // Page, Video, Image, Shape, Text
-                    add { Button.rememberVolume() } // Video, Audio
-                    add { Button.rememberCrop() } // Video, Image
-                    add { Button.rememberAdjustments() } // Video, Image
-                    add { Button.rememberFilter() } // Video, Image
-                    add { Button.rememberEffect() } // Video, Image
-                    add { Button.rememberBlur() } // Video, Image
-                    add { Button.rememberShape() } // Video, Image, Shape
-                    add { Button.rememberSelectGroup() } // Video, Image, Sticker, Shape, Text
-                    add { Button.rememberEnterGroup() } // Group
-                    add { Button.rememberLayer() } // Video, Image, Sticker, Shape, Text
-                    add { Button.rememberSplit() } // Video, Image, Sticker, Shape, Text, Audio
-                    add { Button.rememberMoveAsClip() } // Video, Image, Sticker, Shape, Text
-                    add { Button.rememberMoveAsOverlay() } // Video, Image, Sticker, Shape, Text
-                    add { Button.rememberReorder() } // Video, Image, Sticker, Shape, Text
-                    add { Button.rememberDuplicate() } // Video, Image, Sticker, Shape, Text
-                    add { Button.rememberDelete() } // Video, Image, Sticker, Shape, Text
+                    add { Button.rememberBringForward() }
+                    add { Button.rememberSendBackward() }
+                    add { Divider.remember(visible = { editorContext.canSelectionMove }) }
+                    add { Button.rememberDuplicate() }
+                    add { Button.rememberDelete() }
                 }
 
             /**
@@ -148,23 +115,10 @@ class InspectorBar private constructor(
         }
     }
 
-    @OptIn(ExperimentalAnimationApi::class)
     @Composable
     override fun Scope.Content(animatedVisibilityScope: AnimatedVisibilityScope?) {
-        val animationModifier =
-            animatedVisibilityScope?.run {
-                Modifier.animateEnterExit(
-                    enter = itemsRowEnterTransition(),
-                    exit = itemsRowExitTransition(),
-                )
-            } ?: Modifier
         Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .then(animationModifier),
-            horizontalArrangement = horizontalArrangement(),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             listBuilder.scope.items.forEach {
                 itemDecoration {
@@ -175,7 +129,7 @@ class InspectorBar private constructor(
     }
 
     /**
-     * The scope of the [InspectorBar] component.
+     * The scope of the [CanvasMenu] component.
      *
      * @param parentScope the scope of the parent component.
      * @param selection current selection in the editor.
@@ -186,6 +140,46 @@ class InspectorBar private constructor(
         private val selection: Selection?,
     ) : EditorScope() {
         override val impl: EditorContext = parentScope.editorContext
+
+        private val _isSelectionInGroup by lazy {
+            selection?.parentDesignBlock?.let {
+                DesignBlockType.get(editorContext.engine.block.getType(it)) == DesignBlockType.Group
+            } ?: false
+        }
+
+        private val _selectionSiblings by lazy {
+            selection?.parentDesignBlock ?: return@lazy emptyList()
+            val childIsAlwaysOnTop = editorContext.engine.block.isAlwaysOnTop(selection.designBlock)
+            val childIsAlwaysOnBottom = editorContext.engine.block.isAlwaysOnBottom(selection.designBlock)
+            val children = editorContext.engine.block.getChildren(selection.parentDesignBlock)
+            // contains at least internalSelection.designBlock
+            children.filter { childToCompare ->
+                val matchingIsAlwaysOnTop = childIsAlwaysOnTop == editorContext.engine.block.isAlwaysOnTop(childToCompare)
+                val matchingIsAlwaysOnBottom =
+                    childIsAlwaysOnBottom ==
+                        editorContext.engine.block.isAlwaysOnBottom(
+                            childToCompare,
+                        )
+                matchingIsAlwaysOnTop && matchingIsAlwaysOnBottom
+            }
+        }
+
+        private val _isScenePlaying by lazy {
+            val page = editorContext.engine.scene.getCurrentPage() ?: editorContext.engine.scene.getPages()[0]
+            editorContext.engine.block.isPlaying(page)
+        }
+
+        private val _canSelectionMove by lazy {
+            val selection = selection ?: return@lazy false
+            _isSelectionInGroup.not() &&
+                editorContext.engine.block.isAllowedByScope(selection.designBlock, "editor/add") &&
+                run {
+                    selection.parentDesignBlock?.let {
+                        DesignBlockType.get(editorContext.engine.block.getType(it)) == DesignBlockType.Track &&
+                            editorContext.engine.block.isAlwaysOnBottom(it)
+                    } ?: false
+                }.not() && _selectionSiblings.size > 1
+        }
 
         /**
          * Current selection in the editor.
@@ -199,10 +193,35 @@ class InspectorBar private constructor(
          */
         val EditorContext.selection: Selection
             get() = requireNotNull(this@Scope.selection)
+
+        /**
+         * Returns true if the design block in [selection] is in a [DesignBlockType.Group].
+         */
+        val EditorContext.isSelectionInGroup: Boolean
+            get() = this@Scope._isSelectionInGroup
+
+        /**
+         * Returns true if the selection can be moved: forward or backward.
+         */
+        val EditorContext.canSelectionMove: Boolean
+            get() = this@Scope._canSelectionMove
+
+        /**
+         * Returns the list of siblings of the design block in [selection] that can be used to reorder.
+         * Note that the list contains [Selection.designBlock] as well.
+         */
+        val EditorContext.selectionSiblings: List<DesignBlock>
+            get() = this@Scope._selectionSiblings
+
+        /**
+         * Returns true if the scene is currently playing. The value can be true only when in [ly.img.engine.SceneMode.VIDEO].
+         */
+        val EditorContext.isScenePlaying: Boolean
+            get() = this@Scope._isScenePlaying
     }
 
     override fun toString(): String {
-        return "$`_`InspectorBar(id=$id)"
+        return "$`_`CanvasMenu(id=$id)"
     }
 
     /**
@@ -210,57 +229,79 @@ class InspectorBar private constructor(
      */
     @Stable
     open class ItemScope(
-        parentScope: EditorScope,
+        private val parentScope: EditorScope,
     ) : EditorScope() {
         override val impl: EditorContext = parentScope.editorContext
-
-        private val _selection by lazy {
-            (parentScope as Scope).run {
-                editorContext.safeSelection
-            }
-        }
 
         /**
          * Current selection of the editor.
          */
         val EditorContext.safeSelection: Selection?
-            get() = _selection
+            get() =
+                (parentScope as Scope).run {
+                    editorContext.safeSelection
+                }
 
         /**
          * Current selection of the editor.
          * Note that this is an unsafe call. Consider using [safeSelection] to get the nullable value.
          */
         val EditorContext.selection: Selection
-            get() = requireNotNull(_selection)
+            get() = requireNotNull(safeSelection)
+
+        /**
+         * Returns true if the design block in [selection] is in a [DesignBlockType.Group].
+         */
+        val EditorContext.isSelectionInGroup: Boolean
+            get() =
+                (parentScope as Scope).run {
+                    editorContext.isSelectionInGroup
+                }
+
+        /**
+         * Returns true if the selection can be moved: forward or backward.
+         */
+        val EditorContext.canSelectionMove: Boolean
+            get() =
+                (parentScope as Scope).run {
+                    editorContext.canSelectionMove
+                }
+
+        /**
+         * Returns the list of siblings of the design block in [selection] that can be used to reorder.
+         * Note that the list contains [Selection.designBlock] as well.
+         */
+        val EditorContext.selectionSiblings: List<DesignBlock>
+            get() =
+                (parentScope as Scope).run {
+                    editorContext.selectionSiblings
+                }
     }
 
     /**
-     * A component that represents an item that can be rendered in the inspector bar.
-     * The only limitation is that the component must have a maximum height of 64.dp.
+     * A component that represents an item that can be rendered in the canvas menu.
      */
     abstract class Item<Scope : ItemScope> : EditorComponent<Scope>() {
         /**
-         * The content of the item in the inspector bar.
+         * The content of the item in the canvas menu.
          */
         @Composable
         protected abstract fun Scope.ItemContent()
 
         @Composable
         final override fun Scope.Content(animatedVisibilityScope: AnimatedVisibilityScope?) {
-            Box(modifier = Modifier.sizeIn(maxHeight = 64.dp)) {
-                ItemContent()
-            }
+            ItemContent()
         }
     }
 
     /**
-     * A component that represents a custom content in the [InspectorBar].
+     * A component that represents a custom content in the [CanvasMenu].
      *
      * @param scope the scope of this component. Every new value will trigger recomposition of all functions with
      * signature @Composable Scope.() -> {}.
      * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
      * Consider using [ItemScope] as the scope which will be updated when the parent component scope
-     * ([InspectorBar.scope], accessed via [LocalEditorScope]) is updated:
+     * ([CanvasMenu.scope], accessed via [LocalEditorScope]) is updated:
      *     scope = LocalEditorScope.current.run {
      *         remember(this) { ItemScope(parentScope = this) }
      *     }
@@ -286,12 +327,12 @@ class InspectorBar private constructor(
         }
 
         override fun toString(): String {
-            return "InspectorBar.Custom(id=$id)"
+            return "CanvasMenu.Custom(id=$id)"
         }
 
         companion object {
             /**
-             * A composable function that creates and remembers a [InspectorBar.Custom] instance.
+             * A composable function that creates and remembers a [CanvasMenu.Custom] instance.
              *
              * @param id the id of the custom view.
              * Note that it is highly recommended that every unique [EditorComponent] has a unique id.
@@ -305,7 +346,7 @@ class InspectorBar private constructor(
              * @param exitTransition transition of the custom item when it exits the parent composable.
              * Default value is always no exit transition.
              * @param content the content of the component.
-             * @return a custom item that will be displayed in the inspector bar.
+             * @return a custom item that will be displayed in the canvas menu.
              */
             @Composable
             fun <Scope : ItemScope> remember(
@@ -339,26 +380,7 @@ class InspectorBar private constructor(
     ) : ItemScope(parentScope)
 
     /**
-     * The scope of the [InspectorBar.Button.Companion.rememberFillStroke] button in the inspector bar.
-     *
-     * @param parentScope the scope of the parent component.
-     * @param fillStrokeIcon the icon state of the fill stroke button.
-     */
-    @Stable
-    open class FillStrokeButtonScope(
-        parentScope: EditorScope,
-        private val fillStrokeIcon: EditorIcon.FillStroke?,
-    ) : ButtonScope(parentScope) {
-        /**
-         * The icon state of the fill stroke button. Used in the [Button.Companion.rememberFillStroke]
-         * button implementation.
-         */
-        val EditorContext.fillStrokeIcon: EditorIcon.FillStroke
-            get() = requireNotNull(this@FillStrokeButtonScope.fillStrokeIcon)
-    }
-
-    /**
-     * A component that represents a button in the [InspectorBar].
+     * A component that represents a button in the [CanvasMenu].
      *
      * @param id the id of the button.
      * Note that it is highly recommended that every unique [EditorComponent] has a unique id.
@@ -391,19 +413,16 @@ class InspectorBar private constructor(
         @Composable
         override fun ButtonScope.ItemContent() {
             IconTextButton(
-                modifier =
-                    Modifier
-                        .widthIn(min = 64.dp)
-                        .height(64.dp),
                 onClick = { onClick() },
                 enabled = enabled(),
                 icon = icon?.let { { it() } },
                 text = text?.let { { it() } },
+                contentPadding = PaddingValues(0.dp),
             )
         }
 
         override fun toString(): String {
-            return "$`_`InspectorBar.Button(id=$id)"
+            return "$`_`CanvasMenu.Button(id=$id)"
         }
 
         class Id {
@@ -417,7 +436,7 @@ class InspectorBar private constructor(
             val alwaysEnabled: @Composable ButtonScope.() -> Boolean = { true }
 
             /**
-             * A composable function that creates and remembers an [InspectorBar.Button] instance.
+             * A composable function that creates and remembers a [CanvasMenu.Button] instance.
              *
              * @param id the id of the button.
              * Note that it is highly recommended that every unique [EditorComponent] has a unique id.
@@ -440,7 +459,7 @@ class InspectorBar private constructor(
              * Default value is null.
              * @param enabled whether the button is enabled.
              * Default value is always true.
-             * @return a button that will be displayed in the inspector bar.
+             * @return a button that will be displayed in the canvas menu.
              */
             @Composable
             fun remember(
@@ -477,7 +496,7 @@ class InspectorBar private constructor(
             }
 
             /**
-             * A composable helper function that creates and remembers an [InspectorBar.Button] instance where [icon] composable is
+             * A composable helper function that creates and remembers a [CanvasMenu.Button] instance where [icon] composable is
              * provided via [ImageVector] and [text] composable via [String].
              *
              * @param id the id of the button.
@@ -503,7 +522,7 @@ class InspectorBar private constructor(
              * Default value is null.
              * @param enabled whether the button is enabled.
              * Default value is always true.
-             * @return a button that will be displayed in the inspector bar.
+             * @return a button that will be displayed in the canvas menu.
              */
             @Composable
             fun remember(
@@ -558,9 +577,121 @@ class InspectorBar private constructor(
         }
     }
 
+    /**
+     * The scope of the [Divider] component.
+     *
+     * @param parentScope the scope of the parent component.
+     */
+    @Stable
+    open class DividerScope(
+        parentScope: EditorScope,
+    ) : ItemScope(parentScope)
+
+    /**
+     * A component that represents a button in the [CanvasMenu].
+     *
+     * @param id the id of the button.
+     * Note that it is highly recommended that every unique [EditorComponent] has a unique id.
+     * @param scope the scope of this component. Every new value will trigger recomposition of all functions with
+     * signature @Composable Scope.() -> {}.
+     * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
+     * @param visible whether the button should be visible.
+     * @param enterTransition transition of the button when it enters the parent composable.
+     * @param exitTransition transition of the button when it exits the parent composable.
+     * @param decoration decoration of the button. Useful when you want to add custom background, foreground, shadow, paddings etc.
+     * @param modifier the modifier of the divider.
+     * @param color the color of the divider.
+     */
+    @Stable
+    class Divider private constructor(
+        override val scope: DividerScope,
+        override val visible: @Composable DividerScope.() -> Boolean,
+        override val enterTransition: @Composable DividerScope.() -> EnterTransition,
+        override val exitTransition: @Composable DividerScope.() -> ExitTransition,
+        override val decoration: @Composable DividerScope.(content: @Composable () -> Unit) -> Unit,
+        val modifier: @Composable DividerScope.() -> Modifier,
+        val color: @Composable DividerScope.() -> Color,
+        private val `_`: Nothing,
+    ) : Item<DividerScope>() {
+        override val id = EditorComponentId("ly.img.component.canvasMenu.divider")
+
+        @Composable
+        override fun DividerScope.ItemContent() {
+            Divider(
+                modifier = modifier(),
+                color = color(),
+            )
+        }
+
+        override fun toString(): String {
+            return "$`_`CanvasMenu.Divider(id=$id)"
+        }
+
+        class Id {
+            companion object
+        }
+
+        companion object {
+            /**
+             * A composable function that creates and remembers a [Divider] instance.
+             *
+             * @param scope the scope of this component. Every new value will trigger recomposition of all functions with
+             * signature @Composable Scope.() -> {}.
+             * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
+             * By default it is updated only when the parent scope (accessed via [LocalEditorScope]) is updated.
+             * @param visible whether the divider should be visible.
+             * Default value is always true.
+             * @param enterTransition transition of the divider when it enters the parent composable.
+             * Default value is always no enter transition.
+             * @param exitTransition transition of the divider when it exits the parent composable.
+             * Default value is always no exit transition.
+             * @param decoration decoration of the divider. Useful when you want to add custom background, foreground, shadow, paddings etc.
+             * Default value is always no decoration.
+             * @param modifier the modifier of the divider.
+             * Default value is always a [Modifier] that sets size and paddings to the divider.
+             * @param color the color of the divider.
+             * Default value is always [DividerDefaults.color].
+             * @return a divider that will be displayed in the canvas menu.
+             */
+            @Composable
+            fun remember(
+                scope: DividerScope =
+                    LocalEditorScope.current.run {
+                        remember(this) { DividerScope(parentScope = this) }
+                    },
+                visible: @Composable DividerScope.() -> Boolean = alwaysVisible,
+                enterTransition: @Composable DividerScope.() -> EnterTransition = noneEnterTransition,
+                exitTransition: @Composable DividerScope.() -> ExitTransition = noneExitTransition,
+                decoration: @Composable DividerScope.(@Composable () -> Unit) -> Unit = { it() },
+                modifier: @Composable DividerScope.() -> Modifier = {
+                    remember(this) {
+                        Modifier
+                            .padding(horizontal = 8.dp)
+                            .size(width = 1.dp, height = 24.dp)
+                    }
+                },
+                color: @Composable DividerScope.() -> Color = { DividerDefaults.color },
+                `_`: Nothing = nothing,
+            ): Divider {
+                return remember(scope, visible, enterTransition, exitTransition, modifier, color) {
+                    Divider(
+                        scope = scope,
+                        visible = visible,
+                        enterTransition = enterTransition,
+                        exitTransition = exitTransition,
+                        decoration = decoration,
+                        modifier = modifier,
+                        color = color,
+                        `_` = `_`,
+                    )
+                }
+            }
+        }
+    }
+
     companion object {
         /**
-         * The default scope of the inspector bar.
+         * The default scope of the canvas menu.
          */
         @OptIn(ExperimentalCoroutinesApi::class)
         val defaultScope: Scope
@@ -571,11 +702,22 @@ class InspectorBar private constructor(
                         return editorContext.engine.block.findAllSelected().firstOrNull()
                     }
                     val initial = remember { getSelectedDesignBlock()?.let { Selection.getDefault(editorContext.engine, it) } }
+                    val camera = editorContext.engine.block.findByType(DesignBlockType.Camera).first()
                     val selection by remember(this) {
                         editorContext.engine.block.onSelectionChanged()
                             .flatMapLatest {
                                 val selectedDesignBlock = getSelectedDesignBlock() ?: return@flatMapLatest flowOf(null)
-                                editorContext.engine.event.subscribe(listOf(selectedDesignBlock))
+                                val parentDesignBlock = editorContext.engine.block.getParent(selectedDesignBlock)
+                                val observableDesignBlocks =
+                                    parentDesignBlock
+                                        ?.let { listOf(it, selectedDesignBlock) } ?: listOf(selectedDesignBlock)
+                                merge(
+                                    editorContext.engine.event.subscribe(observableDesignBlocks),
+                                    editorContext.engine.event.subscribe(listOf(camera)),
+                                    editorContext.engine.editor.onStateChanged()
+                                        .map { editorContext.engine.editor.getEditMode() }
+                                        .distinctUntilChanged(),
+                                )
                                     .filter {
                                         // When the design block is unselected/deleted, this lambda is entered before onSelectionChanged is emitted.
                                         // We need to make sure that this flow does not emit previous selection in such scenario.
@@ -585,279 +727,209 @@ class InspectorBar private constructor(
                                     .onStart { emit(Selection.getDefault(editorContext.engine, selectedDesignBlock)) }
                             }
                     }.collectAsState(initial = initial)
-                    remember(this, selection) {
+
+                    var isScenePlayingTrigger by remember { mutableStateOf(false) }
+                    LaunchedEffect(this) {
+                        val page = editorContext.engine.scene.getCurrentPage() ?: editorContext.engine.scene.getPages()[0]
+                        editorContext.engine.event.subscribe(listOf(page))
+                            .onEach { isScenePlayingTrigger = isScenePlayingTrigger.not() }
+                            .collect()
+                    }
+
+                    remember(this, selection, isScenePlayingTrigger) {
                         Scope(parentScope = this, selection = selection)
                     }
                 }
 
         /**
-         * The default enter transition of the row of items.
-         * Note that the items are animated separately from the inspector bar. They both run in parallel.
-         */
-        val defaultItemsRowEnterTransition: @Composable Scope.() -> EnterTransition = {
-            remember {
-                slideInHorizontally(
-                    animationSpec = tween(400, easing = CubicBezierEasing(0.05F, 0.7F, 0.1F, 1F)),
-                    initialOffsetX = { it / 3 },
-                )
-            }
-        }
-
-        /**
-         * The default enter transition of the inspector bar.
-         */
-        val defaultEnterTransition: @Composable Scope.() -> EnterTransition = {
-            remember {
-                slideInVertically(
-                    animationSpec =
-                        tween(
-                            durationMillis = 400,
-                            easing = CubicBezierEasing(0.05f, 0.7f, 0.1f, 1f),
-                        ),
-                    initialOffsetY = { it },
-                )
-            }
-        }
-
-        /**
-         * The default exit transition of the inspector bar.
-         */
-        val defaultExitTransition: @Composable Scope.() -> ExitTransition = {
-            remember {
-                slideOutVertically(
-                    animationSpec =
-                        tween(
-                            durationMillis = 150,
-                            easing = CubicBezierEasing(0.3f, 0f, 0.8f, 0.15f),
-                        ),
-                    targetOffsetY = { it },
-                )
-            }
-        }
-
-        /**
-         * The default decoration of the inspector bar.
-         * Sets a background color, applies paddings and adds a close button to the inspector bar.
-         */
-        val defaultDecoration: @Composable Scope.(@Composable () -> Unit) -> Unit = {
-            DefaultDecoration { it() }
-        }
-
-        /**
-         * The default decoration of the inspector bar.
-         * Sets a background color, applies paddings and adds a close button to the inspector barby adding a containing box.
+         * The default decoration of the canvas menu.
+         * Calculates the position and rotation of the selected design block and finds the coordinates where the canvas menu should be placed.
+         * Finally, canvas menu is placed in a surface which parameters can be configured.
          *
-         * @param background the background of the containing box.
-         * @param paddingValues the padding values of the containing box.
-         * @param content the content of the inspector bar.
+         * @param shape the shape of the surface.
+         * @param contentColor the content color of the surface.
+         * @param shadowElevation the shadow elevation of the surface.
+         * @param rotateHandleSize the reserved size of the rotate handle.
+         * @param verticalPadding the vertical padding between the surface and selected design block.
+         * @param horizontalPadding the horizontal padding between the surface and horizontal borders of the canvas.
+         * @param content the content of the canvas menu.
          */
         @Composable
         inline fun Scope.DefaultDecoration(
-            background: Color = MaterialTheme.colorScheme.surface,
-            paddingValues: PaddingValues = PaddingValues(start = 16.dp, top = 10.dp, bottom = 10.dp),
-            content: @Composable () -> Unit,
+            shape: Shape = MaterialTheme.shapes.extraLarge,
+            contentColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+            shadowElevation: Dp = 1.dp,
+            rotateHandleSize: Dp = 48.dp,
+            verticalPadding: Dp = 24.dp,
+            horizontalPadding: Dp = 16.dp,
+            crossinline content: @Composable () -> Unit,
         ) {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .background(background)
-                        .padding(paddingValues),
-            ) {
-                Box {
-                    val gradientHeight = 64.dp
-                    val gradientWidth = 16.dp
-                    val closeButtonWidth = 48.dp
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start,
-                    ) {
-                        Surface(
-                            onClick = {
-                                editorContext.engine.block.setSelected(editorContext.selection.designBlock, false)
-                            },
-                            modifier =
-                                Modifier
-                                    .size(closeButtonWidth, gradientHeight)
-                                    .padding(start = 4.dp, end = 4.dp, top = 2.dp, bottom = 6.dp)
-                                    .semantics { role = Role.Button },
-                            shape = IconButtonDefaults.filledShape,
-                            color = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            shadowElevation = 3.dp,
-                        ) {
-                            Box(
-                                modifier = Modifier.size(40.dp),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Icon(IconPack.Close, contentDescription = stringResource(id = R.string.ly_img_editor_close))
-                            }
+            val editorState by editorContext.state.collectAsState()
+            val selectedBlockRect = editorContext.selection.screenSpaceBoundingBoxRect
+            if (selectedBlockRect.width().isNaN().not() && selectedBlockRect.height().isNaN().not()) {
+                val rotateHandleSizePx = rotateHandleSize.toPx()
+                val dy =
+                    remember(editorState, editorContext.selection, rotateHandleSize) {
+                        val isGizmoPresent =
+                            editorContext.engine.editor.getSettingBoolean("controlGizmo/showRotateHandles") ||
+                                editorContext.engine.editor.getSettingBoolean("controlGizmo/showMoveHandles")
+                        if (isGizmoPresent) {
+                            val rotation = editorContext.engine.block.getRotation(editorContext.selection.designBlock)
+                            (cos(rotation) * rotateHandleSizePx).roundToInt()
+                        } else {
+                            0
                         }
-                        content()
                     }
+                Surface(
+                    shape = shape,
+                    contentColor = contentColor,
+                    shadowElevation = shadowElevation,
+                    modifier =
+                        Modifier.layout { measurable, constraints ->
+                            val placeable = measurable.measure(constraints)
+                            val width = placeable.width
+                            val height = placeable.height
+                            layout(width, height) nestedLayout@{
+                                // In certain scenarios (eg. changing theme while the Canvas Menu is visible),
+                                // it was observed that minWidth = maxWidth = 0. Not sure why this happens, for now, we just return here.
+                                if (constraints.isZero) return@nestedLayout
+                                val verticalPaddingPx = verticalPadding.roundToPx()
+                                val horizontalPaddingPx = horizontalPadding.roundToPx()
+                                val x = selectedBlockRect.centerX().dp.roundToPx() - width / 2
+                                val minX = constraints.minWidth + horizontalPaddingPx
+                                val maxX = constraints.maxWidth - width - horizontalPaddingPx
+                                // minX > maxX if the allocated horizontal size of the canvas menu is larger than the screen size
+                                val constrainedX = if (minX > maxX) horizontalPaddingPx else x.coerceIn(minX, maxX)
 
-                    val gradientColor = MaterialTheme.colorScheme.surface
-                    val gradient =
-                        remember(gradientColor) {
-                            Brush.horizontalGradient(
-                                listOf(
-                                    gradientColor,
-                                    gradientColor.copy(alpha = 0f),
-                                ),
-                            )
-                        }
-                    Box(
-                        modifier =
-                            Modifier
-                                .offset(x = closeButtonWidth)
-                                .size(gradientWidth, gradientHeight)
-                                .background(gradient),
-                    )
-                }
+                                // Preference order -
+                                // 1. Top
+                                // 2. Bottom
+                                // 3. Below top handle
+                                val constrainedY =
+                                    run {
+                                        val blockCenterY = selectedBlockRect.centerY()
+                                        val blockHeight = selectedBlockRect.height()
+                                        val canvasInsets = editorState.canvasInsets
+                                        val minY = constraints.minHeight + canvasInsets.top.dp.roundToPx()
+                                        val topY = (blockCenterY - blockHeight / 2).dp.roundToPx() - height - verticalPaddingPx + if (dy < 0) dy else 0
+                                        if (topY > minY) {
+                                            return@run topY
+                                        }
+                                        val bottomY = (blockCenterY + blockHeight / 2).dp.roundToPx() + verticalPaddingPx + if (dy > 0) dy else 0
+                                        val bottomCutOff = constraints.maxHeight - canvasInsets.bottom.dp.roundToPx()
+                                        if (bottomY + height + horizontalPaddingPx <= bottomCutOff) {
+                                            return@run bottomY
+                                        }
+                                        (blockCenterY - blockHeight / 2).dp.roundToPx() + horizontalPaddingPx + if (dy < 0) dy else 0
+                                    }
+                                placeable.place(constrainedX, constrainedY)
+                            }
+                        },
+                ) { content() }
             }
         }
 
         /**
-         * A composable function that creates and remembers an [InspectorBar] instance.
-         * By default, the following items are added to the inspector bar. Each item also contains information for which design
+         * A composable function that creates and remembers a [CanvasMenu] instance.
+         * By default, the following items are added to the canvas menu. Each item also contains information for which design
          * block type, fill and kind the item is shown:
          *
-         * - InspectorBar.Button.rememberReplace // Video, Image, Sticker, Audio
-         *
-         * - InspectorBar.Button.rememberEditText // Text
-         * - InspectorBar.Button.rememberFormatText // Text
-         * - InspectorBar.Button.rememberFillStroke // Page, Video, Image, Shape, Text
-         * - InspectorBar.Button.rememberVolume // Video, Audio (video scenes only)
-         * - InspectorBar.Button.rememberCrop // Video, Image
-         *
-         * - InspectorBar.Button.rememberAdjustments // Video, Image
-         * - InspectorBar.Button.rememberFilter // Video, Image
-         * - InspectorBar.Button.rememberEffect // Video, Image
-         * - InspectorBar.Button.rememberBlur // Video, Image
-         * - InspectorBar.Button.rememberShape // Video, Image, Shape
-         *
-         * - InspectorBar.Button.rememberSelectGroup // Video, Image, Sticker, Shape, Text
-         * - InspectorBar.Button.rememberEnterGroup // Group
-         *
-         * - InspectorBar.Button.rememberLayer // Video, Image, Sticker, Shape, Text
-         * - InspectorBar.Button.rememberSplit // Video, Image, Sticker, Shape, Text, Audio (video scenes only)
-         * - InspectorBar.Button.rememberMoveAsClip // Video, Image, Sticker, Shape, Text (video scenes only)
-         * - InspectorBar.Button.rememberMoveAsOverlay // Video, Image, Sticker, Shape, Text (video scenes only)
-         * - InspectorBar.Button.rememberReorder // Video, Image, Sticker, Shape, Text (video scenes only)
-         * - InspectorBar.Button.rememberDuplicate // Video, Image, Sticker, Shape, Text, Audio
-         * - InspectorBar.Button.rememberDelete // Video, Image, Sticker, Shape, Text, Audio
+         * - CanvasMenu.Button.rememberBringForward
+         * - CanvasMenu.Button.rememberSendBackward
+         * - CanvasMenu.Divider.remember
+         * - CanvasMenu.Button.rememberDuplicate
+         * - CanvasMenu.Button.rememberDelete
          *
          * For example, if you do not want to touch the default order, but rather add additional items and replace/hide default items, then
-         * it is more convenient to call [EditorComponent.ListBuilder.modify] on the default builder [InspectorBar.ListBuilder.remember]:
+         * it is more convenient to call [EditorComponent.ListBuilder.modify] on the default builder [CanvasMenu.ListBuilder.remember]:
          *
-         * inspectorBar = {
-         *     InspectorBar.remember(
-         *         listBuilder = InspectorBar.ListBuilder.remember().modify {
+         * canvasMenu = {
+         *     CanvasMenu.remember(
+         *         listBuilder = CanvasMenu.ListBuilder.remember().modify {
          *             addLast {
-         *                 InspectorBar.Button.remember(
-         *                     id = EditorComponentId("my.package.inspectorBar.button.last")
+         *                 CanvasMenu.Button.remember(
+         *                     id = EditorComponentId("my.package.canvasMenu.button.last")
          *                     vectorIcon = { IconPack.Music },
          *                     text = { "Last Button" },
          *                     onClick = {}
          *                 )
          *             }
          *             addFirst {
-         *                 InspectorBar.Button.remember(
-         *                     id = EditorComponentId("my.package.inspectorBar.button.first")
+         *                 CanvasMenu.Button.remember(
+         *                     id = EditorComponentId("my.package.canvasMenu.button.first")
          *                     vectorIcon = { IconPack.Music },
          *                     text = { "First Button" },
          *                     onClick = {}
          *                 )
          *             }
-         *             addAfter(id = InspectorBar.Button.Id.adjustments) {
-         *                 InspectorBar.Button.remember(
-         *                     id = EditorComponentId("my.package.inspectorBar.button.afterAdjustments")
+         *             addAfter(id = CanvasMenu.Button.Id.sendBackward) {
+         *                 CanvasMenu.Button.remember(
+         *                     id = EditorComponentId("my.package.canvasMenu.button.afterSendBackward")
          *                     vectorIcon = { IconPack.Music },
          *                     text = { "After System Gallery" },
          *                     onClick = {}
          *                 )
          *             }
-         *             addBefore(id = InspectorBar.Button.Id.shape) {
-         *                 InspectorBar.Button.remember(
-         *                     id = EditorComponentId("my.package.inspectorBar.button.beforeShape")
+         *             addBefore(id = CanvasMenu.Button.Id.duplicate) {
+         *                 CanvasMenu.Button.remember(
+         *                     id = EditorComponentId("my.package.canvasMenu.button.beforeDuplicate")
          *                     vectorIcon = { IconPack.Music },
          *                     text = { "Before System Camera" },
          *                     onClick = {}
          *                 )
          *             }
-         *             replace(id = InspectorBar.Button.Id.volume) {
+         *             replace(id = CanvasMenu.Button.Id.bringForward) {
          *                 // Note that it can be replaced with a component that has a different id.
-         *                 InspectorBar.Button.rememberElementsLibrary(
+         *                 CanvasMenu.Button.rememberBringForward(
          *                     vectorIcon = { IconPack.Music }
          *                 )
          *             }
-         *             remove(id = InspectorBar.Button.Id.shapesLibrary)
+         *             remove(id = CanvasMenu.Button.Id.delete)
          *         }
          *     )
          * }
          *
          * However, if you want to make more complex customizations that includes touching the default order, it is more convenient to
-         * go fully custom via [InspectorBar.ListBuilder.remember] with [listBuilder] looking like this:
+         * go fully custom via [CanvasMenu.ListBuilder.remember] with [listBuilder] looking like this:
          *
          * For example, if you want to
-         *  - 1. replace the icon of InspectorBar.Button.rememberAdjustments,
-         *  - 2. drop InspectorBar.Button.rememberShape, InspectorBar.Button.rememberDelete, InspectorBar.Button.rememberSelectGroup, InspectorBar.Button.rememberEnterGroup,
-         *  - 3. swap InspectorBar.Button.rememberFilter and InspectorBar.Button.rememberEffect,
-         *  - 4. add one custom button to the front and another in the middle,
+         *  - 1. replace the icon of CanvasMenu.Button.rememberBringForward,
+         *  - 2. drop CanvasMenu.Button.delete,
+         *  - 3. swap CanvasMenu.Button.bringForward and CanvasMenu.Button.sendBackward,
+         *  - 4. add one custom button to the front,
          *  - 5. update first custom button text when second custom button is clicked with an incremented value,
-         *  - 6. show InspectorBar.Button.rememberEffect when the counter is even,
+         *  - 6. show CanvasMenu.Button.rememberDuplicate when the counter is even,
          *  - 7. force update all items on any engine event (that will be obvious from first custom button random icon).
-         * you should invoke [InspectorBar.remember] with [listBuilder] looking like this:
+         * you should invoke [CanvasMenu.remember] with [listBuilder] looking like this:
          *
-         * inspectorBar = {
+         * canvasMenu = {
          *     var counter by remember { mutableStateOf(0) }
-         *     val inspectorBarScope by remember(this) {
+         *     val canvasMenuScope by remember(this) {
          *          editorContext.engine.event.subscribe()
-         *              .map { InspectorBar.Scope(parentScope = this) }
-         *     }.collectAsState(initial = remember { InspectorBar.Scope(parentScope = this) })
-         *     InspectorBar.remember(
-         *         scope = inspectorBarScope,
-         *         listBuilder = InspectorBar.ListBuilder.remember {
+         *              .map { CanvasMenu.Scope(parentScope = this) }
+         *     }.collectAsState(initial = remember { CanvasMenu.Scope(parentScope = this) })
+         *     CanvasMenu.remember(
+         *         scope = canvasMenuScope,
+         *         listBuilder = CanvasMenu.ListBuilder.remember {
          *             add {
-         *                 InspectorBar.Button.remember(
-         *                     id = EditorComponentId("my.package.inspectorBar.button.first"),
+         *                 CanvasMenu.Button.remember(
+         *                     id = EditorComponentId("my.package.canvasMenu.button.first"),
          *                     vectorIcon = { listOf(IconPack.Music, IconPack.PlayBox).random() },
          *                     text = { "Custom1 $counter" },
          *                     onClick = {}
          *                 )
          *             }
-         *             add { InspectorBar.Button.rememberReplace() }
-         *             add { InspectorBar.Button.rememberEditText() }
-         *             add { InspectorBar.Button.rememberFormatText() }
-         *             add { InspectorBar.Button.rememberFillStroke() }
-         *             add { InspectorBar.Button.rememberVolume() }
-         *             add { InspectorBar.Button.rememberCrop() }
+         *             add { CanvasMenu.Button.rememberSendBackward() }
          *             add {
-         *                 InspectorBar.Button.rememberAdjustments(
+         *                 CanvasMenu.Button.rememberBringForward(
          *                     vectorIcon = { IconPack.PlayBox },
          *                 )
          *             }
          *             add {
-         *                 InspectorBar.Button.rememberEffect(
+         *                 CanvasMenu.Button.rememberDuplicate(
          *                     visible = { counter % 2 == 0 }
          *                 )
          *             }
-         *             add { InspectorBar.Button.rememberFilter() }
-         *             add { InspectorBar.Button.rememberBlur() }
-         *             add {
-         *                 InspectorBar.Button.remember(
-         *                     id = EditorComponentId("my.package.inspectorBar.button.middle"),
-         *                     vectorIcon = { IconPack.PlayBox },
-         *                     text = { "Custom2" },
-         *                     onClick = { counter++ }
-         *                 )
-         *             }
-         *             add { InspectorBar.Button.rememberLayer() }
-         *             add { InspectorBar.Button.rememberSplit() }
-         *             add { InspectorBar.Button.rememberMoveAsClip() }
-         *             add { InspectorBar.Button.rememberMoveAsOverlay() }
-         *             add { InspectorBar.Button.rememberReorder() }
-         *             add { InspectorBar.Button.rememberDuplicate() }
          *         }
          *     )
          * }
@@ -866,45 +938,51 @@ class InspectorBar private constructor(
          * signature @Composable Scope.() -> {}.
          * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
          * By default it is updated when the parent scope (accessed via [LocalEditorScope]) is updated and when [Selection] changes.
-         * @param visible whether the inspector bar should be visible based on the [Engine]'s current state.
-         * Default value is always true.
-         * @param enterTransition transition of the inspector bar when it enters the parent composable.
-         * Default value is [defaultEnterTransition].
-         * @param exitTransition transition of the inspector bar when it exits the parent composable.
-         * Default value is [defaultExitTransition].
-         * @param decoration decoration of the inspector bar. Useful when you want to add custom background, foreground, shadow, paddings etc.
-         * Default value is [defaultDecoration].
-         * @param listBuilder a builder that builds the list of [InspectorBar.Item]s that should be part of the inspector bar.
-         * Note that adding items to the list does not mean displaying. The items will be displayed if [InspectorBar.Item.visible]
+         * @param visible whether the canvas menu should be visible.
+         * By default the value is true when touch is not active, no sheet is displayed currently, a design block is selected, it is not part of a group,
+         * selected design block does not have a type [DesignBlockType.Audio] or [DesignBlockType.Page] and the keyboard is not visible.
+         * In addition, selected design block should be visible at current playback time and containing scene should be on pause if design block is selected in a video scene.
+         * @param enterTransition transition of the canvas menu when it enters the parent composable.
+         * Default value is always no enter transition.
+         * @param exitTransition transition of the canvas menu when it exits the parent composable.
+         * Default value is always no exit transition.
+         * @param decoration decoration of the canvas menu. Useful when you want to add custom background, foreground, shadow, paddings etc.
+         * Default value is [DefaultDecoration].
+         * @param listBuilder a builder that builds the list of [CanvasMenu.Item]s that should be part of the canvas menu.
+         * Note that adding items to the list does not mean displaying. The items will be displayed if [CanvasMenu.Item.visible]
          * is true for them.
          * Also note that items will be rebuilt when [scope] is updated.
-         * By default, the list mentioned above is added to the inspector bar.
-         * @param horizontalArrangement the horizontal arrangement that should be used to render the items in the inspector bar horizontally.
-         * Default value is [Arrangement.Start].
-         * @param itemsRowEnterTransition separate transition of the [Item]s row only when [enterTransition] is running.
-         * Default value is [defaultItemsRowEnterTransition].
-         * @param itemsRowExitTransition separate transition of the [Item]s row only when [exitTransition] is running.
-         * Default value is always no exit transition.
-         * @param itemDecoration decoration of the items in the inspector bar. Useful when you want to add custom background, foreground, shadow,
+         * By default, the list mentioned above is added to the canvas menu.
+         * @param itemDecoration decoration of the items in the canvas menu. Useful when you want to add custom background, foreground, shadow,
          * paddings etc to the items. Prefer using this decoration when you want to apply the same decoration to all the items, otherwise
          * set decoration to individual items.
          * Default value is always no decoration.
-         * @return an inspector bar that will be displayed when a design block is selected.
+         * @return a canvas menu that will be displayed when a design block is selected.
          */
         @Composable
         fun remember(
             scope: Scope = defaultScope,
-            visible: @Composable Scope.() -> Boolean = { editorContext.safeSelection != null },
-            enterTransition: @Composable Scope.() -> EnterTransition = defaultEnterTransition,
-            exitTransition: @Composable Scope.() -> ExitTransition = defaultExitTransition,
-            decoration: @Composable Scope.(content: @Composable () -> Unit) -> Unit = defaultDecoration,
+            visible: @Composable Scope.() -> Boolean = {
+                val editorState by editorContext.state.collectAsState()
+                remember(this, editorState) {
+                    editorState.isTouchActive.not() &&
+                        editorState.activeSheet == null &&
+                        editorContext.safeSelection != null &&
+                        editorContext.isSelectionInGroup.not() &&
+                        editorContext.selection.type != DesignBlockType.Page &&
+                        editorContext.selection.type != DesignBlockType.Audio &&
+                        editorContext.engine.editor.getEditMode() != "Text" &&
+                        editorContext.isScenePlaying.not() &&
+                        editorContext.selection.isVisibleAtCurrentPlaybackTime
+                }
+            },
+            enterTransition: @Composable Scope.() -> EnterTransition = noneEnterTransition,
+            exitTransition: @Composable Scope.() -> ExitTransition = noneExitTransition,
+            decoration: @Composable Scope.(content: @Composable () -> Unit) -> Unit = { DefaultDecoration { it() } },
             listBuilder: EditorComponent.ListBuilder<Item<*>> = ListBuilder.remember(),
-            horizontalArrangement: @Composable Scope.() -> Arrangement.Horizontal = { Arrangement.Start },
-            itemsRowEnterTransition: @Composable Scope.() -> EnterTransition = defaultItemsRowEnterTransition,
-            itemsRowExitTransition: @Composable Scope.() -> ExitTransition = noneExitTransition,
             itemDecoration: @Composable Scope.(content: @Composable () -> Unit) -> Unit = { it() },
             `_`: Nothing = nothing,
-        ): InspectorBar {
+        ): CanvasMenu {
             return remember(
                 scope,
                 visible,
@@ -912,21 +990,15 @@ class InspectorBar private constructor(
                 exitTransition,
                 decoration,
                 listBuilder,
-                horizontalArrangement,
-                itemsRowEnterTransition,
-                itemsRowExitTransition,
                 itemDecoration,
             ) {
-                InspectorBar(
+                CanvasMenu(
                     scope = scope,
                     visible = visible,
                     enterTransition = enterTransition,
                     exitTransition = exitTransition,
                     decoration = decoration,
                     listBuilder = listBuilder,
-                    horizontalArrangement = horizontalArrangement,
-                    itemsRowEnterTransition = itemsRowEnterTransition,
-                    itemsRowExitTransition = itemsRowExitTransition,
                     itemDecoration = itemDecoration,
                     `_` = `_`,
                 )

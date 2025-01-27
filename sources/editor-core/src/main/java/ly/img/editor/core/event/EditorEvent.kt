@@ -115,6 +115,16 @@ interface EditorEvent {
          * An event for deleting currently selected design block.
          */
         class Delete : EditorEvent
+
+        /**
+         * An event for bringing forward currently selected design block.
+         */
+        class BringForward : EditorEvent
+
+        /**
+         * An event for sending backward currently selected design block.
+         */
+        class SendBackward : EditorEvent
     }
 
     /**

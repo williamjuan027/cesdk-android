@@ -12,13 +12,16 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.flow.StateFlow
 import ly.img.editor.core.EditorContext
 import ly.img.editor.core.EditorScope
 import ly.img.editor.core.LocalEditorScope
+import ly.img.editor.core.component.CanvasMenu
 import ly.img.editor.core.component.Dock
 import ly.img.editor.core.component.InspectorBar
 import ly.img.editor.core.event.EditorEventHandler
 import ly.img.editor.core.library.AssetLibrary
+import ly.img.editor.core.state.EditorState
 import ly.img.editor.core.ui.utils.activity
 import ly.img.engine.Engine
 import ly.img.engine.UnstableEngineApi
@@ -62,6 +65,7 @@ class EditorContextImpl(
     override val overlay: (@Composable (EditorScope.(Parcelable) -> Unit)?),
     override val dock: (@Composable (EditorScope.() -> Dock))?,
     override val inspectorBar: (@Composable (EditorScope.() -> InspectorBar))?,
+    override val canvasMenu: (@Composable (EditorScope.() -> CanvasMenu))?,
 ) : EditorContext {
     @OptIn(UnstableEngineApi::class)
     override val engine: Engine by lazy {
@@ -78,16 +82,23 @@ class EditorContextImpl(
     override val eventHandler: EditorEventHandler
         get() = requireNotNull(_eventHandler) { "EditorEventHandler is not initialized yet." }
 
+    private var _state: StateFlow<EditorState>? = null
+    override val state: StateFlow<EditorState>
+        get() = requireNotNull(_state) { "StateFlow<EditorState> is not initialized yet." }
+
     fun init(
         activity: Activity,
         eventHandler: EditorEventHandler,
+        state: StateFlow<EditorState>,
     ) {
         _activity = activity
         _eventHandler = eventHandler
+        _state = state
     }
 
     fun clear() {
         _activity = null
         _eventHandler = null
+        _state = null
     }
 }

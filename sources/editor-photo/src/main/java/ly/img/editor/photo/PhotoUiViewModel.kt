@@ -154,7 +154,7 @@ class PhotoUiViewModel(
         }
         engine.deselectAllBlocks()
         engine.editor.setEditMode(TRANSFORM_EDIT_MODE)
-        engine.zoomToPage(pageIndex.value, currentInsets)
+        engine.zoomToPage(pageIndex.value, publicState.value.canvasInsets)
     }
 
     override fun onEditModeChanged(editMode: String) {

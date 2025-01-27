@@ -65,6 +65,7 @@ import ly.img.engine.DesignBlockType
 import ly.img.engine.Engine
 import ly.img.engine.EngineException
 import ly.img.engine.MimeType
+import ly.img.engine.SceneMode
 import ly.img.engine.addDefaultAssetSources
 import ly.img.engine.addDemoAssetSources
 import java.io.File
@@ -229,15 +230,15 @@ object EditorDefaults {
      *
      * @param engine the engine that is used in the editor.
      * @param eventHandler the object that can send [EditorEvent]s.
+     * @param mimeType the mime type of the export. The default is based on the [SceneMode].
      */
     suspend fun onExport(
         engine: Engine,
         eventHandler: EditorEventHandler,
+        mimeType: MimeType = if (engine.isSceneModeVideo) MimeType.MP4 else MimeType.PDF,
     ) {
         EditorDefaults.run {
-            val mimeType: MimeType
             if (engine.isSceneModeVideo) {
-                mimeType = MimeType.MP4
                 val page = engine.scene.getCurrentPage() ?: engine.scene.getPages()[0]
                 eventHandler.send(ShowVideoExportProgressEvent(0f))
                 runCatching {
@@ -265,7 +266,6 @@ object EditorDefaults {
                 }
             } else {
                 eventHandler.send(ShowLoading)
-                mimeType = MimeType.PDF
                 val buffer =
                     engine.block.export(
                         block = requireNotNull(engine.scene.get()),

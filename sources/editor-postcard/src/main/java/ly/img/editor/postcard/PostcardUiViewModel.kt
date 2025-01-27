@@ -128,7 +128,7 @@ class PostcardUiViewModel(
     override fun enterPreviewMode() {
         engine.deselectAllBlocks()
         showAllPages()
-        engine.zoomToScene(currentInsets)
+        engine.zoomToScene(publicState.value.canvasInsets)
     }
 
     override fun openSheet(type: SheetType) {

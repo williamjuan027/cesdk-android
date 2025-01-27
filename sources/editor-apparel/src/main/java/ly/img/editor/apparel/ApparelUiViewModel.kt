@@ -32,7 +32,7 @@ class ApparelUiViewModel(
     }
 
     override fun enterPreviewMode() {
-        engine.zoomToBackdrop(currentInsets)
+        engine.zoomToBackdrop(publicState.value.canvasInsets)
         engine.deselectAllBlocks()
         pageSetup()
     }

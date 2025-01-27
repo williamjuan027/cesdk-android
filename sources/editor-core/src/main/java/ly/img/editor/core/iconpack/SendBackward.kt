@@ -1,4 +1,4 @@
-package ly.img.editor.core.ui.iconpack
+package ly.img.editor.core.iconpack
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -12,14 +12,14 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
-val IconPack.Sendbackward: ImageVector
+val IconPack.SendBackward: ImageVector
     get() {
         if (_sendbackward != null) {
             return _sendbackward!!
         }
         _sendbackward =
             Builder(
-                name = "Sendbackward",
+                name = "SendBackward",
                 defaultWidth = 24.0.dp,
                 defaultHeight =
                     24.0.dp,
@@ -77,4 +77,4 @@ private var _sendbackward: ImageVector? = null
 
 @Preview
 @Composable
-private fun Preview() = IconPack.Sendbackward.IconPreview()
+private fun Preview() = IconPack.SendBackward.IconPreview()

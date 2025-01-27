@@ -24,6 +24,7 @@ internal fun rememberEditorScope(
                     assetLibrary = editorConfiguration.assetLibrary,
                     dock = editorConfiguration.dock,
                     inspectorBar = editorConfiguration.inspectorBar,
+                    canvasMenu = editorConfiguration.canvasMenu,
                     overlay = (editorConfiguration as EditorConfiguration<Parcelable>).overlay,
                 )
         }

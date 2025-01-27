@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import ly.img.editor.base.components.color_picker.fillAndStrokeColors
 import ly.img.editor.core.EditorScope
 import ly.img.editor.core.UnstableEditorApi
+import ly.img.editor.core.component.CanvasMenu
 import ly.img.editor.core.component.Dock
 import ly.img.editor.core.component.InspectorBar
 import ly.img.editor.core.component.data.Nothing
@@ -53,7 +54,11 @@ import ly.img.editor.core.library.AssetLibrary
  * @param inspectorBar the configuration object of the inspector bar that is displayed as horizontal list of items at the
  * bottom of the editor when a design block is selected.
  * If null, then the inspector bar will not be rendered.
- * By default [InspectorBar.remember] is returned with default values.
+ * By default [InspectorBar.remember] is returned with default items.
+ * @param canvasMenu the configuration object of the canvas menu that is displayed as horizontal list of items next to
+ * the selected design block.
+ * If null, then the canvas menu will not be rendered.
+ * By default [CanvasMenu.remember] is returned with default items.
  * @return an [EditorConfiguration] that should be used to launch a [DesignEditor].
  */
 @UnstableEditorApi
@@ -71,6 +76,7 @@ fun EditorConfiguration.Companion.rememberForDesign(
     },
     dock: (@Composable EditorScope.() -> Dock)? = { Dock.rememberForDesign() },
     inspectorBar: (@Composable EditorScope.() -> InspectorBar)? = { InspectorBar.remember() },
+    canvasMenu: (@Composable EditorScope.() -> CanvasMenu)? = { CanvasMenu.remember() },
     `_`: Nothing = nothing,
 ): EditorConfiguration<EditorUiState> =
     remember(
@@ -83,6 +89,7 @@ fun EditorConfiguration.Companion.rememberForDesign(
         overlay = overlay,
         dock = dock,
         inspectorBar = inspectorBar,
+        canvasMenu = canvasMenu,
         `_` = `_`,
     )
 
@@ -121,7 +128,11 @@ fun EditorConfiguration.Companion.rememberForDesign(
  * @param inspectorBar the configuration object of the inspector bar that is displayed as horizontal list of items at the
  * bottom of the editor when a design block is selected.
  * If null, then the inspector bar will not be rendered.
- * By default [InspectorBar.remember] is returned with default values.
+ * By default [InspectorBar.remember] is returned with default items.
+ * @param canvasMenu the configuration object of the canvas menu that is displayed as horizontal list of items next to
+ * the selected design block.
+ * If null, then the canvas menu will not be rendered.
+ * By default [CanvasMenu.remember] is returned with default items.
  * @return an [EditorConfiguration] that should be used to launch a [PhotoEditor].
  */
 @UnstableEditorApi
@@ -139,6 +150,7 @@ fun EditorConfiguration.Companion.rememberForPhoto(
     },
     dock: (@Composable EditorScope.() -> Dock)? = { Dock.rememberForPhoto() },
     inspectorBar: (@Composable EditorScope.() -> InspectorBar)? = { InspectorBar.remember() },
+    canvasMenu: (@Composable EditorScope.() -> CanvasMenu)? = { CanvasMenu.remember() },
     `_`: Nothing = nothing,
 ): EditorConfiguration<EditorUiState> =
     remember(
@@ -151,6 +163,7 @@ fun EditorConfiguration.Companion.rememberForPhoto(
         overlay = overlay,
         dock = dock,
         inspectorBar = inspectorBar,
+        canvasMenu = canvasMenu,
         `_` = `_`,
     )
 
@@ -186,7 +199,11 @@ fun EditorConfiguration.Companion.rememberForPhoto(
  * @param inspectorBar the configuration object of the inspector bar that is displayed as horizontal list of items at the
  * bottom of the editor when a design block is selected.
  * If null, then the inspector bar will not be rendered.
- * By default [InspectorBar.remember] is returned with default values.
+ * By default [InspectorBar.remember] is returned with default items.
+ * @param canvasMenu the configuration object of the canvas menu that is displayed as horizontal list of items next to
+ * the selected design block.
+ * If null, then the canvas menu will not be rendered.
+ * By default [CanvasMenu.remember] is returned with default items.
  * @return an [EditorConfiguration] that should be used to launch a [ApparelEditor].
  */
 @UnstableEditorApi
@@ -203,6 +220,7 @@ fun EditorConfiguration.Companion.rememberForApparel(
         EditorDefaults.Overlay(state = state, eventHandler = editorContext.eventHandler)
     },
     inspectorBar: (@Composable EditorScope.() -> InspectorBar)? = { InspectorBar.remember() },
+    canvasMenu: (@Composable EditorScope.() -> CanvasMenu)? = { CanvasMenu.remember() },
     `_`: Nothing = nothing,
 ): EditorConfiguration<EditorUiState> =
     remember(
@@ -214,6 +232,7 @@ fun EditorConfiguration.Companion.rememberForApparel(
         onEvent = onEvent,
         overlay = overlay,
         inspectorBar = inspectorBar,
+        canvasMenu = canvasMenu,
         `_` = `_`,
     )
 
@@ -249,7 +268,11 @@ fun EditorConfiguration.Companion.rememberForApparel(
  * @param inspectorBar the configuration object of the inspector bar that is displayed as horizontal list of items at the
  * bottom of the editor when a design block is selected.
  * If null, then the inspector bar will not be rendered.
- * By default [InspectorBar.remember] is returned with default values.
+ * By default [InspectorBar.remember] is returned with default items.
+ * @param canvasMenu the configuration object of the canvas menu that is displayed as horizontal list of items next to
+ * the selected design block.
+ * If null, then the canvas menu will not be rendered.
+ * By default [CanvasMenu.remember] is returned with default items.
  * @return an [EditorConfiguration] that should be used to launch a [PostcardEditor].
  */
 @UnstableEditorApi
@@ -266,6 +289,7 @@ fun EditorConfiguration.Companion.rememberForPostcard(
         EditorDefaults.Overlay(state = state, eventHandler = editorContext.eventHandler)
     },
     inspectorBar: (@Composable EditorScope.() -> InspectorBar)? = { InspectorBar.remember() },
+    canvasMenu: (@Composable EditorScope.() -> CanvasMenu)? = { CanvasMenu.remember() },
     `_`: Nothing = nothing,
 ): EditorConfiguration<EditorUiState> =
     remember(
@@ -277,6 +301,7 @@ fun EditorConfiguration.Companion.rememberForPostcard(
         onEvent = onEvent,
         overlay = overlay,
         inspectorBar = inspectorBar,
+        canvasMenu = canvasMenu,
         `_` = `_`,
     )
 
@@ -313,8 +338,12 @@ fun EditorConfiguration.Companion.rememberForPostcard(
  * If null, then the dock will not be rendered.
  * @param inspectorBar the configuration object of the inspector bar that is displayed as horizontal list of items at the
  * bottom of the editor when a design block is selected.
- * By default [InspectorBar.remember] is returned with default values.
  * If null, then the inspector bar will not be rendered.
+ * By default [InspectorBar.remember] is returned with default items.
+ * @param canvasMenu the configuration object of the canvas menu that is displayed as horizontal list of items next to
+ * the selected design block.
+ * If null, then the canvas menu will not be rendered.
+ * By default [CanvasMenu.remember] is returned with default items.
  * @return an [EditorConfiguration] that should be used to launch a [VideoEditor].
  */
 @UnstableEditorApi
@@ -332,6 +361,7 @@ fun EditorConfiguration.Companion.rememberForVideo(
     },
     dock: (@Composable EditorScope.() -> Dock)? = { Dock.rememberForVideo() },
     inspectorBar: (@Composable EditorScope.() -> InspectorBar)? = { InspectorBar.remember() },
+    canvasMenu: (@Composable EditorScope.() -> CanvasMenu)? = { CanvasMenu.remember() },
     `_`: Nothing = nothing,
 ): EditorConfiguration<EditorUiState> =
     remember(
@@ -344,5 +374,6 @@ fun EditorConfiguration.Companion.rememberForVideo(
         overlay = overlay,
         dock = dock,
         inspectorBar = inspectorBar,
+        canvasMenu = canvasMenu,
         `_` = `_`,
     )

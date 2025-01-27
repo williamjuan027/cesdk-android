@@ -59,7 +59,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import ly.img.editor.base.components.EditingTextCard
-import ly.img.editor.base.components.actionmenu.CanvasActionMenu
 import ly.img.editor.base.dock.AdjustmentSheetContent
 import ly.img.editor.base.dock.BottomSheetContent
 import ly.img.editor.base.dock.CustomBottomSheetContent
@@ -133,7 +132,6 @@ fun EditorUi(
     val externalState = rememberSaveable { mutableStateOf(initialExternalState) }
     val uiScope = rememberCoroutineScope()
     val bottomSheetContent by viewModel.bottomSheetContent.collectAsState()
-    val canvasActionMenuUiState by viewModel.canvasActionMenuUiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var timelineExpanded by remember { mutableStateOf(true) }
     var hideTimeline: Boolean by remember { mutableStateOf(false) }
@@ -237,6 +235,7 @@ fun EditorUi(
         (editorContext as EditorContextImpl).init(
             activity = activity,
             eventHandler = viewModel,
+            state = viewModel.publicState,
         )
         mutableStateOf(Unit)
     }
@@ -641,11 +640,10 @@ fun EditorUi(
                                 }
                             }
                         }
-                        canvasActionMenuUiState?.let {
-                            CanvasActionMenu(
-                                uiState = it,
-                                onEvent = viewModel::send,
-                            )
+                        if (uiState.isCanvasVisible) {
+                            editorContext.canvasMenu?.let {
+                                EditorComponent(component = it(editorScope))
+                            }
                         }
                         if (uiState.isEditingText) {
                             EditingTextCard(

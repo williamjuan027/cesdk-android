@@ -1,4 +1,4 @@
-package ly.img.editor.core.ui.iconpack
+package ly.img.editor.core.iconpack
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -12,14 +12,14 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
-val IconPack.Bringforward: ImageVector
+val IconPack.BringForward: ImageVector
     get() {
         if (_bringforward != null) {
             return _bringforward!!
         }
         _bringforward =
             Builder(
-                name = "Bringforward",
+                name = "BringForward",
                 defaultWidth = 24.0.dp,
                 defaultHeight =
                     24.0.dp,
@@ -73,4 +73,4 @@ private var _bringforward: ImageVector? = null
 
 @Preview
 @Composable
-private fun Preview() = IconPack.Bringforward.IconPreview()
+private fun Preview() = IconPack.BringForward.IconPreview()

@@ -7,10 +7,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -40,10 +43,6 @@ import ly.img.engine.Engine
  * Use [remember] composable function in the companion object to create an instance of this class, or use
  * [rememberForDesign], [rememberForPhoto] and [rememberForVideo] helpers that construct solution specific docks.
  *
- * @param listBuilder a builder that builds the list of [Dock.Item]s that should be part of the dock.
- * Note that adding items to the list does not mean displaying. The items will be displayed if [Dock.Item.visible] is true for them.
- * @param horizontalArrangement the horizontal arrangement that should be used to render the items in the dock horizontally.
- * Default value is [Arrangement.SpaceEvenly].
  * @param scope the scope of this component. Every new value will trigger recomposition of all the lambda parameters.
  * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
  * Consider using Compose [androidx.compose.runtime.State] objects in the lambdas
@@ -55,19 +54,23 @@ import ly.img.engine.Engine
  * @param enterTransition transition of the dock when it enters the parent composable.
  * @param exitTransition transition of the dock when it exits the parent composable.
  * @param decoration decoration of the dock. Useful when you want to add custom background, foreground, shadow, paddings etc.
+ * @param listBuilder a builder that builds the list of [Dock.Item]s that should be part of the dock.
+ * Note that adding items to the list does not mean displaying. The items will be displayed if [Dock.Item.visible] is true for them.
+ * @param horizontalArrangement the horizontal arrangement that should be used to render the items in the dock horizontally.
+ * Default value is [Arrangement.SpaceEvenly].
  * @param itemDecoration decoration of the items in the dock. Useful when you want to add custom background, foreground, shadow,
  * paddings etc to the items. Prefer using this decoration when you want to apply the same decoration to all the items, otherwise
  * set decoration to individual items.
  */
 @Stable
 class Dock private constructor(
-    val listBuilder: EditorComponent.ListBuilder<Item<*>>,
-    val horizontalArrangement: @Composable Scope.() -> Arrangement.Horizontal,
     override val scope: Scope,
     override val visible: @Composable Scope.() -> Boolean,
     override val enterTransition: @Composable Scope.() -> EnterTransition,
     override val exitTransition: @Composable Scope.() -> ExitTransition,
     override val decoration: @Composable Scope.(content: @Composable () -> Unit) -> Unit,
+    val listBuilder: EditorComponent.ListBuilder<Item<*>>,
+    val horizontalArrangement: @Composable Scope.() -> Arrangement.Horizontal,
     val itemDecoration: @Composable Scope.(content: @Composable () -> Unit) -> Unit,
     private val `_`: Nothing,
 ) : EditorComponent<Scope>() {
@@ -272,20 +275,24 @@ class Dock private constructor(
     @Stable
     class Button private constructor(
         override val id: EditorComponentId,
-        val onClick: ButtonScope.() -> Unit,
-        val icon: (@Composable ButtonScope.() -> Unit)?,
-        val text: (@Composable ButtonScope.() -> Unit)?,
-        val enabled: @Composable ButtonScope.() -> Boolean,
         override val scope: ButtonScope,
         override val visible: @Composable ButtonScope.() -> Boolean,
         override val enterTransition: @Composable ButtonScope.() -> EnterTransition,
         override val exitTransition: @Composable ButtonScope.() -> ExitTransition,
         override val decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit,
+        val onClick: ButtonScope.() -> Unit,
+        val icon: (@Composable ButtonScope.() -> Unit)?,
+        val text: (@Composable ButtonScope.() -> Unit)?,
+        val enabled: @Composable ButtonScope.() -> Boolean,
         private val `_`: Nothing,
     ) : Item<ButtonScope>() {
         @Composable
         override fun ButtonScope.ItemContent() {
             IconTextButton(
+                modifier =
+                    Modifier
+                        .widthIn(min = 64.dp)
+                        .height(64.dp),
                 onClick = { onClick() },
                 enabled = enabled(),
                 icon = icon?.let { { it() } },
@@ -339,10 +346,6 @@ class Dock private constructor(
             @Composable
             fun remember(
                 id: EditorComponentId,
-                onClick: ButtonScope.() -> Unit,
-                icon: (@Composable ButtonScope.() -> Unit)? = null,
-                text: (@Composable ButtonScope.() -> Unit)? = null,
-                enabled: @Composable ButtonScope.() -> Boolean = alwaysEnabled,
                 scope: ButtonScope =
                     LocalEditorScope.current.run {
                         remember(this) { ButtonScope(parentScope = this) }
@@ -351,20 +354,24 @@ class Dock private constructor(
                 enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
                 exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
                 decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
+                onClick: ButtonScope.() -> Unit,
+                icon: (@Composable ButtonScope.() -> Unit)? = null,
+                text: (@Composable ButtonScope.() -> Unit)? = null,
+                enabled: @Composable ButtonScope.() -> Boolean = alwaysEnabled,
                 `_`: Nothing = nothing,
             ): Button {
-                return remember(onClick, icon, text, enabled, scope, visible, enterTransition, exitTransition, decoration) {
+                return remember(scope, visible, enterTransition, exitTransition, decoration, onClick, icon, text, enabled) {
                     Button(
                         id = id,
-                        onClick = onClick,
-                        icon = icon,
-                        text = text,
-                        enabled = enabled,
                         scope = scope,
                         visible = visible,
                         enterTransition = enterTransition,
                         exitTransition = exitTransition,
                         decoration = decoration,
+                        onClick = onClick,
+                        icon = icon,
+                        text = text,
+                        enabled = enabled,
                         `_` = `_`,
                     )
                 }
@@ -376,15 +383,6 @@ class Dock private constructor(
              *
              * @param id the id of the button.
              * Note that it is highly recommended that every unique [EditorComponent] has a unique id.
-             * @param onClick the callback that is invoked when the button is clicked.
-             * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
-             * Default value is null.
-             * @param text the text content of the button as a string. If null then text is not rendered.
-             * Default value is null.
-             * @param tint the tint color of the content. If null then no tint is applied.
-             * Default value is null.
-             * @param enabled whether the button is enabled.
-             * Default value is always true.
              * @param scope the scope of this component. Every new value will trigger recomposition of all the lambda parameters.
              * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
              * Consider using Compose [androidx.compose.runtime.State] objects in the lambdas for
@@ -400,16 +398,20 @@ class Dock private constructor(
              * Default value is always no exit transition.
              * @param decoration decoration of the button. Useful when you want to add custom background, foreground, shadow, paddings etc.
              * Default value is always no decoration.
+             * @param onClick the callback that is invoked when the button is clicked.
+             * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
+             * Default value is null.
+             * @param text the text content of the button as a string. If null then text is not rendered.
+             * Default value is null.
+             * @param tint the tint color of the content. If null then no tint is applied.
+             * Default value is null.
+             * @param enabled whether the button is enabled.
+             * Default value is always true.
              * @return a button that will be displayed in the dock.
              */
             @Composable
             fun remember(
                 id: EditorComponentId,
-                onClick: ButtonScope.() -> Unit,
-                vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = null,
-                text: (@Composable ButtonScope.() -> String)? = null,
-                tint: (@Composable ButtonScope.() -> Color)? = null,
-                enabled: @Composable ButtonScope.() -> Boolean = alwaysEnabled,
                 scope: ButtonScope =
                     LocalEditorScope.current.run {
                         remember(this) { ButtonScope(parentScope = this) }
@@ -418,10 +420,20 @@ class Dock private constructor(
                 enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
                 exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
                 decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
+                onClick: ButtonScope.() -> Unit,
+                vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = null,
+                text: (@Composable ButtonScope.() -> String)? = null,
+                tint: (@Composable ButtonScope.() -> Color)? = null,
+                enabled: @Composable ButtonScope.() -> Boolean = alwaysEnabled,
                 `_`: Nothing = nothing,
             ): Button =
                 remember(
                     id = id,
+                    scope = scope,
+                    visible = visible,
+                    enterTransition = enterTransition,
+                    exitTransition = exitTransition,
+                    decoration = decoration,
                     onClick = onClick,
                     icon =
                         vectorIcon?.let {
@@ -445,11 +457,6 @@ class Dock private constructor(
                             }
                         },
                     enabled = enabled,
-                    scope = scope,
-                    visible = visible,
-                    enterTransition = enterTransition,
-                    exitTransition = exitTransition,
-                    decoration = decoration,
                     `_` = `_`,
                 )
         }
@@ -461,14 +468,31 @@ class Dock private constructor(
          * Sets a background color and applies paddings to the dock.
          */
         val defaultDecoration: @Composable Scope.(@Composable () -> Unit) -> Unit = {
+            DefaultDecoration { it() }
+        }
+
+        /**
+         * The default decoration of the dock.
+         * Sets a background color and applies paddings to the dock by adding a containing box.
+         *
+         * @param background the background of the containing box.
+         * @param paddingValues the padding values of the containing box.
+         * @param content the content of the dock.
+         */
+        @Composable
+        inline fun Scope.DefaultDecoration(
+            background: Color = MaterialTheme.colorScheme.surface1.copy(alpha = 0.95f),
+            paddingValues: PaddingValues = PaddingValues(vertical = 10.dp),
+            content: @Composable () -> Unit,
+        ) {
             Box(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surface1.copy(alpha = 0.95f))
-                        .padding(vertical = 10.dp),
+                        .background(background)
+                        .padding(paddingValues),
             ) {
-                it()
+                content()
             }
         }
 
@@ -506,8 +530,6 @@ class Dock private constructor(
          */
         @Composable
         fun remember(
-            listBuilder: EditorComponent.ListBuilder<Item<*>> = EditorComponent.ListBuilder.remember { },
-            horizontalArrangement: @Composable Scope.() -> Arrangement.Horizontal = { Arrangement.SpaceEvenly },
             scope: Scope =
                 LocalEditorScope.current.run {
                     remember(this) { Scope(parentScope = this) }
@@ -515,28 +537,30 @@ class Dock private constructor(
             visible: @Composable Scope.() -> Boolean = alwaysVisible,
             enterTransition: @Composable Scope.() -> EnterTransition = noneEnterTransition,
             exitTransition: @Composable Scope.() -> ExitTransition = noneExitTransition,
-            decoration: @Composable Scope.(@Composable () -> Unit) -> Unit = defaultDecoration,
+            decoration: @Composable Scope.(@Composable () -> Unit) -> Unit = { DefaultDecoration { it() } },
+            listBuilder: EditorComponent.ListBuilder<Item<*>> = EditorComponent.ListBuilder.remember { },
+            horizontalArrangement: @Composable Scope.() -> Arrangement.Horizontal = { Arrangement.SpaceEvenly },
             itemDecoration: @Composable Scope.(content: @Composable () -> Unit) -> Unit = { it() },
             `_`: Nothing = nothing,
         ): Dock {
             return remember(
-                listBuilder,
-                horizontalArrangement,
                 scope,
                 visible,
                 enterTransition,
                 exitTransition,
+                listBuilder,
+                horizontalArrangement,
                 decoration,
                 itemDecoration,
             ) {
                 Dock(
-                    listBuilder = listBuilder,
-                    horizontalArrangement = horizontalArrangement,
                     scope = scope,
                     visible = visible,
                     enterTransition = enterTransition,
                     exitTransition = exitTransition,
                     decoration = decoration,
+                    listBuilder = listBuilder,
+                    horizontalArrangement = horizontalArrangement,
                     itemDecoration = itemDecoration,
                     `_` = `_`,
                 )

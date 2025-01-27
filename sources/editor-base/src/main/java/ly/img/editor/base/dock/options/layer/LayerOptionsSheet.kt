@@ -34,14 +34,14 @@ import ly.img.editor.base.components.PropertyLink
 import ly.img.editor.base.components.PropertySlider
 import ly.img.editor.base.ui.BlockEvent
 import ly.img.editor.core.event.EditorEvent
+import ly.img.editor.core.iconpack.BringForward
 import ly.img.editor.core.iconpack.Delete
 import ly.img.editor.core.iconpack.Duplicate
+import ly.img.editor.core.iconpack.SendBackward
 import ly.img.editor.core.ui.SheetHeader
 import ly.img.editor.core.ui.UiDefaults
-import ly.img.editor.core.ui.iconpack.Bringforward
 import ly.img.editor.core.ui.iconpack.Bringtofront
 import ly.img.editor.core.ui.iconpack.IconPack
-import ly.img.editor.core.ui.iconpack.Sendbackward
 import ly.img.editor.core.ui.iconpack.Sendtoback
 import ly.img.editor.core.ui.sheetCardContentModifier
 import ly.img.editor.core.ui.sheetScrollableContentModifier
@@ -138,14 +138,14 @@ fun LayerOptionsSheet(
                         )
                         CardButton(
                             text = stringResource(R.string.ly_img_editor_forward),
-                            icon = IconPack.Bringforward,
+                            icon = CoreIconPack.BringForward,
                             modifier = Modifier.weight(1f),
                             enabled = uiState.canBringForward,
                             onClick = { onEvent(BlockEvent.OnForward) },
                         )
                         CardButton(
                             text = stringResource(R.string.ly_img_editor_backward),
-                            icon = IconPack.Sendbackward,
+                            icon = CoreIconPack.SendBackward,
                             modifier = Modifier.weight(1f),
                             enabled = uiState.canSendBackward,
                             onClick = { onEvent(BlockEvent.OnBackward) },

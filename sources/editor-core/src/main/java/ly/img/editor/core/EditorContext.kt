@@ -7,10 +7,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import kotlinx.coroutines.flow.StateFlow
+import ly.img.editor.core.component.CanvasMenu
 import ly.img.editor.core.component.Dock
 import ly.img.editor.core.component.InspectorBar
 import ly.img.editor.core.event.EditorEventHandler
 import ly.img.editor.core.library.AssetLibrary
+import ly.img.editor.core.state.EditorState
 import ly.img.engine.Engine
 
 /**
@@ -69,6 +72,11 @@ interface EditorContext {
     val inspectorBar: @Composable ((EditorScope.() -> InspectorBar))?
 
     /**
+     * The canvas menu provided via [ly.img.editor.EditorConfiguration.canvasMenu].
+     */
+    val canvasMenu: @Composable ((EditorScope.() -> CanvasMenu))?
+
+    /**
      * The engine of the current editor.
      */
     val engine: Engine
@@ -82,4 +90,9 @@ interface EditorContext {
      * The event handler of the current editor.
      */
     val eventHandler: EditorEventHandler
+
+    /**
+     * The state flow of the [EditorState]. state.current returns the current state of the editor.
+     */
+    val state: StateFlow<EditorState>
 }

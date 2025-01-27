@@ -51,7 +51,7 @@ class DesignUiViewModel(
     }
 
     override fun showPage(index: Int) {
-        zoom(insets = currentInsets, zoomToPage = true)
+        zoom(insets = publicState.value.canvasInsets, zoomToPage = true)
     }
 
     override fun enterPreviewMode() = Unit
