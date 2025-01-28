@@ -70,9 +70,9 @@ internal fun PostcardUiToolbar(
                     } else {
                         TextButton(
                             colors =
-                                ButtonDefaults.textButtonColors(
-                                    contentColor = MaterialTheme.colorScheme.onSurface,
-                                ),
+                            ButtonDefaults.textButtonColors(
+                                contentColor = MaterialTheme.colorScheme.onSurface,
+                            ),
                             onClick = {
                                 onEvent(Event.OnPreviousPage)
                             },
@@ -96,73 +96,73 @@ internal fun PostcardUiToolbar(
                 LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant,
             ) {
                 Row(Modifier.align(Alignment.Center)) {
-                    if (!isInPreviewMode) {
-                        IconButton(
-                            onClick = { onEvent(Event.OnUndoClick) },
-                            enabled = isUndoEnabled,
-                        ) {
-                            Icon(
-                                IconPack.Undo,
-                                contentDescription = stringResource(R.string.ly_img_editor_undo),
-                            )
-                        }
-                        IconButton(
-                            onClick = { onEvent(Event.OnRedoClick) },
-                            enabled = isRedoEnabled,
-                        ) {
-                            Icon(
-                                IconPack.Redo,
-                                contentDescription = stringResource(R.string.ly_img_editor_redo),
-                            )
-                        }
-                    } else {
-                        Spacer(modifier = Modifier.width(96.dp))
-                    }
-                    ToggleIconButton(
-                        checked = isInPreviewMode,
-                        onCheckedChange = { onEvent(Event.OnTogglePreviewMode(it)) },
+//                    if (!isInPreviewMode) {
+                    IconButton(
+                        onClick = { onEvent(Event.OnUndoClick) },
+                        enabled = isUndoEnabled,
                     ) {
                         Icon(
-                            if (isInPreviewMode) IconPack.Visibility else IconPack.Visibilityoutline,
-                            contentDescription = stringResource(R.string.ly_img_editor_toggle_preview_mode),
+                            IconPack.Undo,
+                            contentDescription = stringResource(R.string.ly_img_editor_undo),
                         )
                     }
+                    IconButton(
+                        onClick = { onEvent(Event.OnRedoClick) },
+                        enabled = isRedoEnabled,
+                    ) {
+                        Icon(
+                            IconPack.Redo,
+                            contentDescription = stringResource(R.string.ly_img_editor_redo),
+                        )
+                    }
+//                    } else {
+//                        Spacer(modifier = Modifier.width(96.dp))
+//                    }
+//                    ToggleIconButton(
+//                        checked = isInPreviewMode,
+//                        onCheckedChange = { onEvent(Event.OnTogglePreviewMode(it)) },
+//                    ) {
+//                        Icon(
+//                            if (isInPreviewMode) IconPack.Visibility else IconPack.Visibilityoutline,
+//                            contentDescription = stringResource(R.string.ly_img_editor_toggle_preview_mode),
+//                        )
+//                    }
                 }
             }
 
             Row(Modifier.align(Alignment.CenterEnd)) {
-                if (isInPreviewMode || postcardMode == PostcardMode.Write) {
-                    IconButton(
-                        onClick = { onEvent(Event.OnExportClick) },
-                    ) {
-                        Icon(
-                            IconPack.Share,
-                            contentDescription = stringResource(R.string.ly_img_editor_share),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                } else {
-                    TextButton(
-                        colors =
-                            ButtonDefaults.textButtonColors(
-                                contentColor = MaterialTheme.colorScheme.onSurface,
-                            ),
-                        onClick = {
-                            onEvent(Event.OnNextPage)
-                        },
-                    ) {
-                        Text(
-                            text = stringResource(postCardR.string.ly_img_editor_write),
-                            modifier = Modifier.padding(end = 4.dp),
-                            style = MaterialTheme.typography.titleSmall,
-                        )
-                        Icon(
-                            Icons.Default.ArrowForward,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
+//                if (isInPreviewMode || postcardMode == PostcardMode.Write) {
+                IconButton(
+                    onClick = { onEvent(Event.OnExportClick) },
+                ) {
+                    Icon(
+                        IconPack.Share,
+                        contentDescription = stringResource(R.string.ly_img_editor_share),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
+//                } else {
+//                    TextButton(
+//                        colors =
+//                            ButtonDefaults.textButtonColors(
+//                                contentColor = MaterialTheme.colorScheme.onSurface,
+//                            ),
+//                        onClick = {
+//                            onEvent(Event.OnNextPage)
+//                        },
+//                    ) {
+//                        Text(
+//                            text = stringResource(postCardR.string.ly_img_editor_write),
+//                            modifier = Modifier.padding(end = 4.dp),
+//                            style = MaterialTheme.typography.titleSmall,
+//                        )
+//                        Icon(
+//                            Icons.Default.ArrowForward,
+//                            contentDescription = null,
+//                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+//                        )
+//                    }
+//                }
                 Spacer(modifier = Modifier.width(4.dp))
             }
         }

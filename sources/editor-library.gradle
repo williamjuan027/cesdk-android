@@ -45,7 +45,7 @@ afterEvaluate {
                 def artifactoryUrl = "https://artifactory.img.ly/artifactory/maven"
                 def libGroupId = "ly.img"
                 def libArtifactId = project.name
-                def libVersion = new File("${project.rootDir}/../..", ".ubq-version").text.trim()
+                def libVersion = "1.43.0"//new File("${project.rootDir}/../..", ".ubq-version").text.trim()
 
                 groupId libGroupId
                 artifactId libArtifactId
