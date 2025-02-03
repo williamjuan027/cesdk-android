@@ -307,6 +307,7 @@ abstract class EditorUiViewModel(
         }
         register<EditorEvent.Selection.Duplicate> {
             timelineState?.playerState?.pause()
+            timelineState?.clampPlayheadPositionToSelectedClip()
             getBlockForEvents()?.designBlock?.let(engine::duplicate)
         }
         register<EditorEvent.Selection.Split> {
@@ -327,6 +328,7 @@ abstract class EditorUiViewModel(
         }
         register<EditorEvent.Selection.SelectGroup> {
             timelineState?.playerState?.pause()
+            timelineState?.clampPlayheadPositionToSelectedClip()
             getBlockForEvents()?.designBlock?.let(engine.block::exitGroup)
         }
         register<EditorEvent.Selection.Delete> {

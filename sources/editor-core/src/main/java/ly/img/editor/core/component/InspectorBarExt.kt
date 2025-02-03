@@ -1751,7 +1751,7 @@ val Button.Id.Companion.formatText by unsafeLazy {
  * By default it is updated only when the parent component scope ([InspectorBar.scope], accessed via [LocalEditorScope]) is updated.
  * @param visible whether the button should be visible.
  * By default the value is true when the selected design block type is [DesignBlockType.Text]
- * and has an enabled engine scope "text/edit".
+ * and has an enabled engine scope "text/character".
  * @param enterTransition transition of the button when it enters the parent composable.
  * Default value is always no enter transition.
  * @param exitTransition transition of the button when it exits the parent composable.
@@ -1781,7 +1781,7 @@ fun Button.Companion.rememberFormatText(
     visible: @Composable ButtonScope.() -> Boolean = {
         remember(this) {
             editorContext.selection.type == DesignBlockType.Text &&
-                editorContext.engine.block.isAllowedByScope(editorContext.selection.designBlock, "text/edit")
+                editorContext.engine.block.isAllowedByScope(editorContext.selection.designBlock, "text/character")
         }
     },
     enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
