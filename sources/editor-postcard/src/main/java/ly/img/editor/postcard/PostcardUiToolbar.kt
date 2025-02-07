@@ -56,8 +56,8 @@ internal fun PostcardUiToolbar(
         Box {
             Row(Modifier.align(Alignment.CenterStart)) {
                 Spacer(modifier = Modifier.width(4.dp))
-                if (!isInPreviewMode) {
-                    if (postcardMode == PostcardMode.Design) {
+//                if (!isInPreviewMode) {
+//                    if (postcardMode == PostcardMode.Design) {
                         IconButton(onClick = {
                             onEvent(Event.OnBack)
                         }) {
@@ -67,29 +67,29 @@ internal fun PostcardUiToolbar(
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
-                    } else {
-                        TextButton(
-                            colors =
-                            ButtonDefaults.textButtonColors(
-                                contentColor = MaterialTheme.colorScheme.onSurface,
-                            ),
-                            onClick = {
-                                onEvent(Event.OnPreviousPage)
-                            },
-                        ) {
-                            Icon(
-                                CoreIconPack.ArrowBack,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            Text(
-                                text = stringResource(postCardR.string.ly_img_editor_design),
-                                modifier = Modifier.padding(start = 4.dp),
-                                style = MaterialTheme.typography.titleSmall,
-                            )
-                        }
-                    }
-                }
+//                    } else {
+//                        TextButton(
+//                            colors =
+//                            ButtonDefaults.textButtonColors(
+//                                contentColor = MaterialTheme.colorScheme.onSurface,
+//                            ),
+//                            onClick = {
+//                                onEvent(Event.OnPreviousPage)
+//                            },
+//                        ) {
+//                            Icon(
+//                                CoreIconPack.ArrowBack,
+//                                contentDescription = null,
+//                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+//                            )
+//                            Text(
+//                                text = stringResource(postCardR.string.ly_img_editor_design),
+//                                modifier = Modifier.padding(start = 4.dp),
+//                                style = MaterialTheme.typography.titleSmall,
+//                            )
+//                        }
+//                    }
+//                }
             }
 
             CompositionLocalProvider(
