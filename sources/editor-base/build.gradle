@@ -1,14 +1,12 @@
 apply from: "$projectDir/../editor-library.gradle"
 
 android {
-    namespace 'ly.img.editor.base'
+    namespace = 'ly.img.editor.base'
 }
 
 dependencies {
     api project(':editor-core')
     api project(':editor-core-ui')
-    implementation libs.colormath
-    implementation libs.colormath.compose
 
     debugImplementation libs.compose.tooling
     implementation libs.compose.preview

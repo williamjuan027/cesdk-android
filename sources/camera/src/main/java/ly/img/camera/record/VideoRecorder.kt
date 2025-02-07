@@ -63,17 +63,17 @@ internal class VideoRecorder(private val videoCapture: VideoCapture<Recorder>) {
         recording = null
     }
 
-    private fun createFile(context: Context): File {
-        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(System.currentTimeMillis())
-        return File(context.filesDir, "VIDEO_$timeStamp.mp4")
-    }
-
     fun pause() {
         recording?.pause()
     }
 
     fun resume() {
         recording?.resume()
+    }
+
+    private fun createFile(context: Context): File {
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(System.currentTimeMillis())
+        return File(context.filesDir, "VIDEO_$timeStamp.mp4")
     }
 
     sealed class RecordingStatus(val duration: Duration) {

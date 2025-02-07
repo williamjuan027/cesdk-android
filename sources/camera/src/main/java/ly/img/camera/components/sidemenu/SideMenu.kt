@@ -11,6 +11,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.delay
+import ly.img.camera.components.sidemenu.layout.LayoutMenuItem
+import ly.img.camera.components.sidemenu.layout.LayoutMode
 import ly.img.camera.components.sidemenu.timer.TimerMenuItem
 import ly.img.camera.record.Timer
 
@@ -19,6 +21,9 @@ internal fun SideMenu(
     modifier: Modifier = Modifier,
     timer: Timer,
     setTimer: (Timer) -> Unit,
+    layoutMode: LayoutMode?,
+    setLayoutMode: (LayoutMode) -> Unit,
+    layoutModeEnabled: Boolean,
 ) {
     Column(
         modifier = modifier.width(IntrinsicSize.Max),
@@ -48,5 +53,16 @@ internal fun SideMenu(
             onDropdownMenuDismiss = ::onDropdownMenuDismiss,
             setTimer = setTimer,
         )
+
+        if (layoutMode != null) {
+            LayoutMenuItem(
+                layoutMode = layoutMode,
+                enabled = layoutModeEnabled,
+                expanded = expanded,
+                onClick = ::onItemClick,
+                onDropdownMenuDismiss = ::onDropdownMenuDismiss,
+                setLayoutMode = setLayoutMode,
+            )
+        }
     }
 }

@@ -21,7 +21,6 @@ import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
-import com.github.ajalt.colormath.model.HSV
 
 @Composable
 internal fun SaturationValueArea(
@@ -37,16 +36,11 @@ internal fun SaturationValueArea(
 
     val currentColorGradientBrush =
         remember(currentColor.hue) {
-            val rgb = HSV(h = currentColor.hue, s = 1.0f, v = 1.0f).toSRGB()
+            val hsvColor = HsvColor(hue = currentColor.hue, 1f, 1f, 1f)
             Brush.horizontalGradient(
                 listOf(
                     Color(0xffffffff),
-                    Color(
-                        red = rgb.redInt,
-                        green = rgb.greenInt,
-                        blue = rgb.blueInt,
-                        alpha = rgb.alphaInt,
-                    ),
+                    hsvColor.toComposeColor(),
                 ),
             )
         }

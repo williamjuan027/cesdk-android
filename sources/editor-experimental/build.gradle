@@ -1,7 +1,7 @@
 apply from: "$projectDir/../editor-library.gradle"
 
 android {
-    namespace 'ly.img.editor.compose'
+    namespace = 'ly.img.editor.compose'
 }
 
 dependencies {

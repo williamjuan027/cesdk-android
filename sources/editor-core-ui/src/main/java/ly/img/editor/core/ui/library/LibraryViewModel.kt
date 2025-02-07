@@ -223,7 +223,7 @@ class LibraryViewModel(
         viewModelScope.launch {
             engine.awaitEngineAndSceneLoad()
             val page = engine.getCurrentPage()
-            val backgroundTrack = checkNotNull(engine.block.getBackgroundTrack())
+            val backgroundTrack = engine.getBackgroundTrack()
 
             // set playhead position to end of background track
             engine.block.setPlaybackTime(page, engine.block.getDuration(backgroundTrack))
@@ -243,7 +243,7 @@ class LibraryViewModel(
         uri: Uri,
         duration: Duration,
     ) {
-        val backgroundTrack = checkNotNull(engine.block.getBackgroundTrack())
+        val backgroundTrack = engine.getBackgroundTrack()
         val id = engine.block.create(DesignBlockType.Graphic)
         val rectShape = engine.block.createShape(ShapeType.Rect)
         engine.block.setShape(id, rectShape)
@@ -329,7 +329,7 @@ class LibraryViewModel(
         val page = engine.getCurrentPage()
 
         if (inBackgroundTrack) {
-            val backgroundTrack = checkNotNull(engine.block.getBackgroundTrack())
+            val backgroundTrack = engine.getBackgroundTrack()
             engine.block.appendChild(parent = backgroundTrack, child = designBlock)
             engine.block.fillParent(designBlock)
             // page duration needs to be updated to ensure playback time does not get clamped to the previous known page duration

@@ -60,7 +60,7 @@ class TimelineState(
     private val thumbnailsManager = ThumbnailsManager(engine, coroutineScope)
 
     private val page = engine.getCurrentPage()
-    private val backgroundTrack = engine.block.getBackgroundTrack() ?: createBackgroundTrack()
+    private val backgroundTrack = engine.getBackgroundTrack()
 
     private var pageChildren: List<DesignBlock> = emptyList()
 
@@ -361,14 +361,5 @@ class TimelineState(
         if (totalDuration != oldDuration.seconds) {
             engine.block.setDuration(page, totalDuration.toDouble(DurationUnit.SECONDS))
         }
-    }
-
-    private fun createBackgroundTrack(): DesignBlock {
-        val backgroundTrack = engine.block.create(DesignBlockType.Track)
-        engine.block.appendChild(parent = page, child = backgroundTrack)
-        engine.block.setAlwaysOnBottom(backgroundTrack, true)
-        engine.block.fillParent(backgroundTrack)
-        engine.block.setScopeEnabled(backgroundTrack, Scope.EditorSelect, false)
-        return backgroundTrack
     }
 }

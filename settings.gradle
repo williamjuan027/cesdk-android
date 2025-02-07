@@ -12,8 +12,8 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven {
-            name "IMG.LY Artifactory"
-            url "https://artifactory.img.ly/artifactory/maven"
+            name = "IMG.LY Artifactory"
+            url = "https://artifactory.img.ly/artifactory/maven"
             mavenContent {
                 includeGroup("ly.img")
             }
@@ -44,7 +44,7 @@ def useLocalEngine = {
 
 if (System.getenv("UBQ_USE_LOCAL_ENGINE") == "true" || useLocalEngine()) {
     includeBuild("$ubqRootPath/bindings/android") {
-        name "engine"
+        name = "engine"
         dependencySubstitution {
             substitute module('ly.img:engine') using project(':engine')
             substitute module('ly.img:engine-camera') using project(':engine-camera')

@@ -15,8 +15,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.github.ajalt.colormath.extensions.android.composecolor.toComposeColor
-import com.github.ajalt.colormath.model.HSV
 import ly.img.editor.compose.material3.Slider
 import ly.img.editor.compose.material3.SliderDefaults
 
@@ -30,13 +28,7 @@ internal fun HueSlider(
     var sliderValue by remember(value) { mutableStateOf(value) }
     val colors =
         SliderDefaults.colors(
-            thumbColor =
-                HSV(
-                    h = sliderValue,
-                    s = 1.0,
-                    v = 1.0,
-                    alpha = 1,
-                ).toComposeColor(),
+            thumbColor = HsvColor(hue = sliderValue, 1f, 1f, 1f).toComposeColor(),
         )
     Slider(
         value = sliderValue,

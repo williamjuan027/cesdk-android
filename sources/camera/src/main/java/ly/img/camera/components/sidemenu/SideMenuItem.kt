@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import ly.img.camera.components.Shadowed
 import ly.img.editor.core.theme.LocalExtendedColorScheme
 import ly.img.editor.core.ui.utils.Easing
+import ly.img.editor.core.ui.utils.ifTrue
 
 @Composable
 internal fun SideMenuItem(
@@ -40,6 +42,7 @@ internal fun SideMenuItem(
     @StringRes label: Int,
     checked: Boolean,
     expanded: Boolean,
+    enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
     // The usual Button has a min width which cannot be overriden so we need this custom button
@@ -50,15 +53,20 @@ internal fun SideMenuItem(
                 .minimumInteractiveComponentSize()
                 .clip(CircleShape)
                 .background(Color.Transparent)
-                .clickable(
-                    onClick = onClick,
-                    role = Role.Button,
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication =
-                        rememberRipple(
-                            bounded = false,
-                        ),
-                ),
+                .ifTrue(enabled) {
+                    clickable(
+                        onClick = onClick,
+                        role = Role.Button,
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication =
+                            rememberRipple(
+                                bounded = false,
+                            ),
+                    )
+                }
+                .ifTrue(!enabled) {
+                    alpha(0.5f)
+                },
         contentAlignment = Alignment.Center,
     ) {
         Row(

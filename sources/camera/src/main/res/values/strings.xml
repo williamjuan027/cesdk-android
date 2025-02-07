@@ -19,4 +19,15 @@
     <string name="ly_img_camera_timer_10">10 seconds</string>
 
     <string name="ly_img_camera_recording_limit">Recording limit is %s</string>
+
+    <string name="ly_img_camera_reaction">Reaction</string>
+    <string name="ly_img_camera_layout_vertical">Vertical</string>
+    <string name="ly_img_camera_layout_horizontal">Horizontal</string>
+
+    <string name="ly_img_camera_swap_positions">Swap Positions</string>
+
+    <string name="ly_img_camera_video_error_title">Failed to load video</string>
+    <string name="ly_img_camera_video_error_text">The internet connection appears to be offline.</string>
+    <string name="ly_img_camera_video_error_dismiss">Close</string>
+    <string name="ly_img_camera_video_error_confirm">Retry</string>
 </resources>

@@ -39,7 +39,7 @@ fun EventsHandler.timelineEvents(
                 engine.block.appendChild(parent = checkNotNull(engine.scene.getCurrentPage()), child = id)
             } else {
                 val insertedBlockTimeOffset = engine.block.getTimeOffset(id)
-                val backgroundTrack = checkNotNull(engine.block.getBackgroundTrack())
+                val backgroundTrack = engine.getBackgroundTrack()
                 val backgroundTrackChildren = engine.block.getChildren(backgroundTrack)
 
                 // Find the slot in the background track closest to the current time offset.
@@ -196,7 +196,7 @@ fun EventsHandler.timelineEvents(
         backgroundClips.add(it.newIndex, backgroundClips.removeAt(oldIndex))
 
         engine.block.insertChild(
-            parent = checkNotNull(engine.block.getBackgroundTrack()),
+            parent = engine.getBackgroundTrack(),
             child = it.block,
             index = it.newIndex,
         )
