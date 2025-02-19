@@ -72,8 +72,10 @@ internal fun TimecodeView(
                 platformStyle = PlatformTextStyle(includeFontPadding = false),
             )
 
+        // We don't want to show in the UI if we exceed the max duration
+        // (can happen if you switch camera very close to the max duration)
         Text(
-            text = duration.formatForPlayer(),
+            text = minOf(duration, maxDuration).formatForPlayer(),
             style = textStyle,
             color = MaterialTheme.colorScheme.onSurface,
         )

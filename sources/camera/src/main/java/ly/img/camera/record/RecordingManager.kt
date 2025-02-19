@@ -28,8 +28,6 @@ internal class RecordingManager(
     private val coroutineScope: CoroutineScope,
     private val videoRecorder: VideoRecorder,
 ) {
-    var waitForPause = false
-
     var state by mutableStateOf(State(maxDuration = maxDuration))
         private set
 
@@ -131,7 +129,6 @@ internal class RecordingManager(
                             totalRecordedDuration = updatedDuration,
                             hasReachedMaxDuration = hasReachedMaxDuration(updatedDuration),
                         )
-                    waitForPause = false
                 }
 
                 is VideoRecorder.RecordingStatus.Recording -> {
