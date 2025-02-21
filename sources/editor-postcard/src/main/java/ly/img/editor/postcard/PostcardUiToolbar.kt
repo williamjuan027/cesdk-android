@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -132,13 +133,20 @@ internal fun PostcardUiToolbar(
 
             Row(Modifier.align(Alignment.CenterEnd)) {
 //                if (isInPreviewMode || postcardMode == PostcardMode.Write) {
-                IconButton(
+//                IconButton(
+//                    onClick = { onEvent(Event.OnExportClick) },
+//                ) {
+//                    Icon(
+//                        IconPack.Share,
+//                        contentDescription = stringResource(R.string.ly_img_editor_share),
+//                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+//                    )
+//                }
+                TextButton (
                     onClick = { onEvent(Event.OnExportClick) },
                 ) {
-                    Icon(
-                        IconPack.Share,
-                        contentDescription = stringResource(R.string.ly_img_editor_share),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    Text (
+                        text = "Export"
                     )
                 }
 //                } else {
