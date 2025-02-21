@@ -89,7 +89,7 @@ fun AddClipButton(
                 onEvent(
                     EditorEvent.Sheet.Open(
                         LibraryAddToBackgroundTrackSheetType(
-                            libraryCategory = libraryViewModel.assetLibrary.clips,
+                            libraryCategory = libraryViewModel.assetLibrary.clips(libraryViewModel.sceneMode),
                         ),
                     ),
                 )

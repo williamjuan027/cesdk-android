@@ -295,5 +295,14 @@ sealed interface LibraryContent {
         val Clips by lazy {
             Overlays.copy(titleRes = R.string.ly_img_editor_clips)
         }
+
+        /**
+         * The default content for displaying sticker and shape assets.
+         */
+        val StickersAndShapes by lazy {
+            Stickers.copy(
+                sections = Stickers.sections + Shapes.sections,
+            )
+        }
     }
 }
