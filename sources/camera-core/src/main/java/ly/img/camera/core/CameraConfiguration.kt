@@ -12,7 +12,9 @@ import kotlin.time.Duration.Companion.milliseconds
  *
  * @param recordingColor The color of the record button while recording, and all the other recording indicators.
  * @param maxTotalDuration The target duration for the recording.
+ * In [CameraMode.Reaction], this is ignored and the total duration is limited by the duration of the video being reacted to.
  * @param allowExceedingMaxDuration Adjusts the segments visualization to use the max duration, but does not enforce the limit.
+ * In [CameraMode.Reaction], this is ignored and always behaves as if set to false.
  */
 class CameraConfiguration(
     val recordingColor: Color = Color(0xFFDE6F62),

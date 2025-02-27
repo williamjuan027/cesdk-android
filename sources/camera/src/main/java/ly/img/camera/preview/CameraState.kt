@@ -17,11 +17,12 @@ import kotlinx.coroutines.launch
 internal class CameraState(
     private val previewUseCase: UseCase,
     private val videoCaptureUseCase: UseCase,
+    startWithFrontCamera: Boolean,
 ) {
     val isFlashEnabled: Boolean
         get() = !showFrontCamera
 
-    var showFrontCamera by mutableStateOf(false)
+    var showFrontCamera by mutableStateOf(startWithFrontCamera)
         private set
 
     var cameraFlash by mutableStateOf(false)

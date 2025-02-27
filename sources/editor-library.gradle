@@ -4,17 +4,17 @@ apply plugin: 'maven-publish'
 apply plugin: 'com.github.gmazzo.buildconfig'
 
 android {
-    compileSdk libs.versions.androidCompileSdk.get().toInteger()
+    compileSdk = libs.versions.androidCompileSdk.get().toInteger()
 
     defaultConfig {
-        minSdk libs.versions.androidMinSdk.get().toInteger()
-        targetSdk libs.versions.androidTargetSdk.get().toInteger()
+        minSdk = libs.versions.androidMinSdk.get().toInteger()
+        targetSdk = libs.versions.androidTargetSdk.get().toInteger()
         consumerProguardFiles "consumer-rules.pro"
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
@@ -22,9 +22,8 @@ android {
     }
 
     buildFeatures {
-        compose true
-        buildConfig false
-        resValues true
+        compose = true
+        buildConfig = false
     }
 
     composeOptions {
@@ -47,19 +46,19 @@ afterEvaluate {
                 def libArtifactId = project.name
                 def libVersion = "1.44.0"//new File("${project.rootDir}/../..", ".ubq-version").text.trim()
 
-                groupId libGroupId
-                artifactId libArtifactId
-                version libVersion
+                groupId = libGroupId
+                artifactId = libArtifactId
+                version = libVersion
 
                 // Artifacts
                 from components.release
                 artifact(file("$projectDir/../release/LICENSE.md")) {
-                    classifier "LICENSE"
-                    extension "md"
+                    classifier = "LICENSE"
+                    extension = "md"
                 }
                 artifact(file("$projectDir/../release/ThirdPartyLicenses.md")) {
-                    classifier "ThirdPartyLicenses"
-                    extension "md"
+                    classifier = "ThirdPartyLicenses"
+                    extension = "md"
                 }
 
                 pom {
@@ -84,8 +83,8 @@ afterEvaluate {
                 repositories {
                     maven {
                         credentials {
-                            username="${System.getenv("UBQ_ANDROID_ARTIFACTORY_USERNAME")}"
-                            password="${System.getenv("UBQ_ANDROID_ARTIFACTORY_PASSWORD")}"
+                            username = "${System.getenv("UBQ_ANDROID_ARTIFACTORY_USERNAME")}"
+                            password = "${System.getenv("UBQ_ANDROID_ARTIFACTORY_PASSWORD")}"
                         }
                         url = artifactoryUrl
                     }

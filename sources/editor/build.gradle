@@ -7,7 +7,7 @@ buildConfig {
 }
 
 android {
-    namespace 'ly.img.editor'
+    namespace = 'ly.img.editor'
 }
 
 dependencies {

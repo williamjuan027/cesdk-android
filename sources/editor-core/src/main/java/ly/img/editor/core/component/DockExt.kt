@@ -482,7 +482,7 @@ fun Dock.ListBuilder.Companion.rememberForVideo(): ListBuilder<Item<*>> {
         }
         add { Button.rememberOverlaysLibrary() }
         add { Button.rememberTextLibrary() }
-        add { Button.rememberStickersLibrary() }
+        add { Button.rememberStickersAndShapesLibrary() }
         add { Button.rememberAudiosLibrary() }
         add { Button.rememberReorder() }
     }
@@ -626,7 +626,7 @@ fun Button.Companion.rememberOverlaysLibrary(
             EditorEvent.Sheet.Open(
                 type =
                     SheetType.LibraryAdd(
-                        libraryCategory = editorContext.assetLibrary.overlays,
+                        libraryCategory = editorContext.assetLibrary.overlays(editorContext.engine.scene.getMode()),
                     ),
             ),
         )
@@ -962,6 +962,86 @@ fun Button.Companion.rememberStickersLibrary(
 ): Button =
     remember(
         id = Button.Id.stickersLibrary,
+        scope = scope,
+        visible = visible,
+        enterTransition = enterTransition,
+        exitTransition = exitTransition,
+        decoration = decoration,
+        vectorIcon = vectorIcon,
+        text = text,
+        tint = tint,
+        enabled = enabled,
+        onClick = onClick,
+        `_` = `_`,
+    )
+
+/**
+ * The id of the dock button returned by [Dock.Button.Companion.rememberStickersAndShapesLibrary].
+ */
+val Button.Id.Companion.stickersAndShapesLibrary by unsafeLazy {
+    EditorComponentId("ly.img.component.dock.button.stickersAndShapesLibrary")
+}
+
+/**
+ * A composable helper function that creates and remembers a [Dock.Button] that
+ * opens a library sheet with stickers and shapes via [EditorEvent.Sheet.Open].
+ *
+ * @param scope the scope of this component. Every new value will trigger recomposition of all the lambda parameters.
+ * If you need to access [EditorScope] to construct the scope, use [LocalEditorScope].
+ * Consider using Compose [androidx.compose.runtime.State] objects in the lambdas for
+ * granular recompositions over updating the scope, since scope change triggers full recomposition of the button.
+ * Ideally, scope should be updated when the parent scope (scope of the parent component [Dock] - [Dock.Scope]) is updated
+ * and when you want to observe changes from the [Engine].
+ * By default the scope is updated only when the parent component scope ([Dock.scope], accessed via [LocalEditorScope]) is updated.
+ * @param visible whether the button should be visible.
+ * Default value is always true.
+ * @param enterTransition transition of the button when it enters the parent composable.
+ * Default value is always no enter transition.
+ * @param exitTransition transition of the button when it exits the parent composable.
+ * Default value is always no exit transition.
+ * @param decoration decoration of the button. Useful when you want to add custom background, foreground, shadow, paddings etc.
+ * Default value is always no decoration.
+ * @param vectorIcon the icon content of the button as a vector. If null then icon is not rendered.
+ * Default value is always [IconPack.AddSticker].
+ * @param text the text content of the button as a string. If null then text is not rendered.
+ * Default value is always [R.string.ly_img_editor_sticker].
+ * @param tint the tint color of the content. If null then no tint is applied.
+ * Default value is null.
+ * @param enabled whether the button is enabled.
+ * Default value is always true.
+ * @param onClick the callback that is invoked when the button is clicked.
+ * By default [EditorEvent.Sheet.Open] event is invoked with sheet type [SheetType.LibraryAdd] and
+ * [ly.img.editor.core.library.AssetLibrary.stickersAndShapes] content is displayed on the sheet.
+ * @return a button that will be displayed in the dock.
+ */
+@Composable
+fun Button.Companion.rememberStickersAndShapesLibrary(
+    scope: ButtonScope =
+        LocalEditorScope.current.run {
+            remember(this) { ButtonScope(parentScope = this) }
+        },
+    visible: @Composable ButtonScope.() -> Boolean = alwaysVisible,
+    enterTransition: @Composable ButtonScope.() -> EnterTransition = noneEnterTransition,
+    exitTransition: @Composable ButtonScope.() -> ExitTransition = noneExitTransition,
+    decoration: @Composable ButtonScope.(@Composable () -> Unit) -> Unit = { it() },
+    vectorIcon: (@Composable ButtonScope.() -> ImageVector)? = { IconPack.AddSticker },
+    text: (@Composable ButtonScope.() -> String)? = { stringResource(R.string.ly_img_editor_sticker) },
+    tint: (@Composable ButtonScope.() -> Color)? = null,
+    enabled: @Composable ButtonScope.() -> Boolean = alwaysEnabled,
+    onClick: ButtonScope.() -> Unit = {
+        editorContext.eventHandler.send(
+            EditorEvent.Sheet.Open(
+                type =
+                    SheetType.LibraryAdd(
+                        libraryCategory = editorContext.assetLibrary.stickersAndShapes(editorContext.engine.scene.getMode()),
+                    ),
+            ),
+        )
+    },
+    `_`: Nothing = nothing,
+): Button =
+    remember(
+        id = Button.Id.stickersAndShapesLibrary,
         scope = scope,
         visible = visible,
         enterTransition = enterTransition,

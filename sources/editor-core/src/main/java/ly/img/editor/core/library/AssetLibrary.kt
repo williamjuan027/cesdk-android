@@ -1,5 +1,6 @@
 package ly.img.editor.core.library
 
+import ly.img.editor.core.library.LibraryCategory.Companion.sourceTypes
 import ly.img.engine.SceneMode
 
 /**
@@ -13,8 +14,9 @@ import ly.img.engine.SceneMode
  * @param text a provider for the category that is displayed when inserting a text asset.
  * @param shapes a provider for the category that is displayed when inserting/replacing a shape asset.
  * @param stickers a provider for the category that is displayed when inserting/replacing a sticker asset.
- * @param overlays the category for displaying overlays.
- * @param clips the category for displaying clips.
+ * @param overlays a provider for the category that is displayed when inserting an overlay.
+ * @param clips a provider for the category that is displayed when inserting a clip.
+ * @param stickersAndShapes a provider for the category that is displayed when inserting stickers and shapes.
  */
 data class AssetLibrary(
     val tabs: (SceneMode) -> List<LibraryCategory>,
@@ -25,8 +27,10 @@ data class AssetLibrary(
     val text: (SceneMode) -> LibraryCategory = { LibraryCategory.Text },
     val shapes: (SceneMode) -> LibraryCategory = { LibraryCategory.Shapes },
     val stickers: (SceneMode) -> LibraryCategory = { LibraryCategory.Stickers },
-    val overlays: LibraryCategory = LibraryCategory.Overlays,
-    val clips: LibraryCategory = LibraryCategory.Clips,
+    val overlays: (SceneMode) -> LibraryCategory = { createOverlaysCategory(videos(it), images(it)) },
+    val clips: (SceneMode) -> LibraryCategory = { createClipsCategory(videos(it), images(it)) },
+    val stickersAndShapes: (SceneMode) -> LibraryCategory =
+        { createStickersAndShapesCategory(stickers = stickers(it), shapes = shapes(it)) },
 ) {
     /**
      * Predefined tabs that can be displayed in the asset library.
@@ -57,6 +61,7 @@ data class AssetLibrary(
          * @param stickers the stickers category that is used in the tabs and the [stickers].
          * @param overlays the overlays category.
          * @param clips the clips category.
+         * @param stickersAndShapes the stickers and shapes category.
          */
         fun getDefault(
             tabs: List<Tab> = Tab.entries,
@@ -66,8 +71,9 @@ data class AssetLibrary(
             text: LibraryCategory = LibraryCategory.Text,
             shapes: LibraryCategory = LibraryCategory.Shapes,
             stickers: LibraryCategory = LibraryCategory.Stickers,
-            overlays: LibraryCategory = LibraryCategory.Overlays,
-            clips: LibraryCategory = LibraryCategory.Clips,
+            overlays: LibraryCategory = createOverlaysCategory(videos = videos, images = images),
+            clips: LibraryCategory = createClipsCategory(videos = videos, images = images),
+            stickersAndShapes: LibraryCategory = createStickersAndShapesCategory(stickers = stickers, shapes = shapes),
         ): AssetLibrary {
             fun getElements(sceneMode: SceneMode): LibraryCategory =
                 LibraryCategory.getElements(
@@ -100,8 +106,59 @@ data class AssetLibrary(
                 text = { text },
                 shapes = { shapes },
                 stickers = { stickers },
-                overlays = overlays,
-                clips = clips,
+                overlays = { overlays },
+                clips = { clips },
+                stickersAndShapes = { stickersAndShapes },
+            )
+        }
+
+        private fun createOverlaysCategory(
+            videos: LibraryCategory,
+            images: LibraryCategory,
+        ): LibraryCategory {
+            return LibraryCategory.Overlays
+                .replaceSection(0) {
+                    copy(
+                        sourceTypes = videos.content.sourceTypes,
+                        expandContent = videos.content,
+                    )
+                }.replaceSection(1) {
+                    copy(
+                        sourceTypes = images.content.sourceTypes,
+                        expandContent = images.content,
+                    )
+                }
+        }
+
+        private fun createClipsCategory(
+            videos: LibraryCategory,
+            images: LibraryCategory,
+        ): LibraryCategory {
+            return LibraryCategory.Clips
+                .replaceSection(0) {
+                    copy(
+                        sourceTypes = videos.content.sourceTypes,
+                        expandContent = videos.content,
+                    )
+                }.replaceSection(1) {
+                    copy(
+                        sourceTypes = images.content.sourceTypes,
+                        expandContent = images.content,
+                    )
+                }
+        }
+
+        private fun createStickersAndShapesCategory(
+            stickers: LibraryCategory,
+            shapes: LibraryCategory,
+        ): LibraryCategory {
+            require(stickers.content is LibraryContent.Sections)
+            require(shapes.content is LibraryContent.Sections)
+            return LibraryCategory.StickersAndShapes.copy(
+                content =
+                    LibraryContent.StickersAndShapes.copy(
+                        sections = stickers.content.sections + shapes.content.sections,
+                    ),
             )
         }
     }

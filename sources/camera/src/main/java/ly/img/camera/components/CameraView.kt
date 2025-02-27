@@ -1,5 +1,7 @@
 package ly.img.camera.components
 
+import android.app.Activity
+import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.compose.animation.AnimatedVisibility
@@ -31,6 +33,7 @@ import androidx.lifecycle.Lifecycle
 import ly.img.camera.CameraViewModel
 import ly.img.camera.R
 import ly.img.camera.components.sidemenu.SideMenu
+import ly.img.camera.core.CaptureVideo
 import ly.img.camera.preview.CameraEnginePreview
 import ly.img.camera.record.RecordingManager
 import ly.img.camera.record.Timer
@@ -48,12 +51,15 @@ internal fun BoxScope.CameraView(
     viewModel: CameraViewModel,
 ) {
     val cameraState = viewModel.cameraState
+    val recordingManager = viewModel.recordingManager
+    val context = LocalContext.current
 
     Column(modifier = modifier) {
         CameraEnginePreview(
             engine = viewModel.engine,
             cameraProvider = cameraProvider,
             cameraState = cameraState,
+            setupLayout = viewModel::setupLayout,
             setCameraPreview = viewModel::setCameraPreview,
             modifier =
                 Modifier
@@ -65,13 +71,13 @@ internal fun BoxScope.CameraView(
             isCameraReady = cameraState.isReady,
             isFlashEnabled = cameraState.isFlashEnabled,
             isFlashOn = cameraState.cameraFlash,
+            isSwappingAllowed = viewModel.cameraLayoutMode != null && !recordingManager.hasStartedRecording && recordingManager.hasNotRecordedYet,
             toggleFlash = cameraState::toggleFlash,
             toggleCamera = viewModel::toggleCamera,
+            swapLayoutPositions = viewModel::swapLayoutPositions,
         )
     }
 
-    val recordingManager = viewModel.recordingManager
-    val context = LocalContext.current
     var showCloseDialog by remember { mutableStateOf(false) }
 
     fun close() {
@@ -108,7 +114,7 @@ internal fun BoxScope.CameraView(
         Toolbar(
             isRecording = recordingManager.hasStartedRecording,
             duration = recordingManager.state.totalRecordedDuration,
-            maxDuration = viewModel.cameraConfiguration.maxTotalDuration,
+            maxDuration = recordingManager.state.maxDuration,
             recordingColor = viewModel.cameraConfiguration.recordingColor,
             onCloseClick = ::close,
         )
@@ -131,6 +137,9 @@ internal fun BoxScope.CameraView(
                 SideMenu(
                     timer = recordingManager.state.timer,
                     setTimer = recordingManager::setTimer,
+                    layoutMode = viewModel.cameraLayoutMode,
+                    setLayoutMode = viewModel::updateLayoutMode,
+                    layoutModeEnabled = recordingManager.hasNotRecordedYet,
                 )
             }
 
@@ -156,7 +165,7 @@ internal fun BoxScope.CameraView(
                         text =
                             stringResource(
                                 id = R.string.ly_img_camera_recording_limit,
-                                viewModel.cameraConfiguration.maxTotalDuration.formatForClip(),
+                                recordingManager.state.maxDuration.formatForClip(),
                             ),
                         style = MaterialTheme.typography.titleMedium,
                         color = LocalExtendedColorScheme.current.white,
@@ -173,6 +182,15 @@ internal fun BoxScope.CameraView(
             cameraState = cameraState,
             recordingManager = recordingManager,
             cameraConfiguration = viewModel.cameraConfiguration,
+            deletePreviousRecording = viewModel::deletePreviousRecording,
+            setResult = {
+                val result = viewModel.getResult()
+                val intent = Intent()
+                intent.putExtra(CaptureVideo.INTENT_KEY_CAMERA_RESULT, result)
+                val activity = checkNotNull(context.activity)
+                activity.setResult(Activity.RESULT_OK, intent)
+                activity.finish()
+            },
         )
     }
 }

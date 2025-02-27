@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -27,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ly.img.editor.core.theme.surface1
 import ly.img.editor.core.ui.iconpack.Arrowdropdown
+import ly.img.editor.core.ui.iconpack.Check
 import ly.img.editor.core.ui.iconpack.IconPack
 import ly.img.editor.core.ui.utils.ifTrue
 
@@ -80,9 +83,9 @@ fun PropertyPicker(
                         onDismissRequest = { showMenu = false },
                     ) {
                         properties.forEach {
-                            CheckedTextRow(
-                                isChecked = it.textRes == propertyTextRes,
-                                text = stringResource(it.textRes),
+                            PropertyItem(
+                                checked = it.textRes == propertyTextRes,
+                                textRes = it.textRes,
                                 icon = it.icon,
                                 onClick = {
                                     onPropertyPicked(it.value)
@@ -95,6 +98,46 @@ fun PropertyPicker(
             }
         }
     }
+}
+
+@Composable
+private fun PropertyItem(
+    checked: Boolean,
+    @StringRes textRes: Int,
+    icon: ImageVector? = null,
+    onClick: () -> Unit,
+) {
+    val contentColor = if (checked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+    DropdownMenuItem(
+        modifier =
+            Modifier.ifTrue(checked) {
+                background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+            },
+        colors =
+            MenuDefaults.itemColors(
+                textColor = contentColor,
+                leadingIconColor = contentColor,
+                trailingIconColor = contentColor,
+            ),
+        text = { Text(stringResource(textRes)) },
+        onClick = onClick,
+        leadingIcon = {
+            if (checked) {
+                Icon(
+                    imageVector = IconPack.Check,
+                    contentDescription = null,
+                )
+            }
+        },
+        trailingIcon = {
+            icon?.let {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                )
+            }
+        },
+    )
 }
 
 data class Property(

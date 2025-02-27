@@ -21,14 +21,17 @@ import ly.img.editor.core.ui.iconpack.FlashOff
 import ly.img.editor.core.ui.iconpack.FlashOn
 import ly.img.editor.core.ui.iconpack.FlipCamera
 import ly.img.editor.core.ui.iconpack.IconPack
+import ly.img.editor.core.ui.iconpack.Switchsplitscreen
 
 @Composable
 internal fun CameraControls(
     isCameraReady: Boolean,
     isFlashEnabled: Boolean,
     isFlashOn: Boolean,
+    isSwappingAllowed: Boolean,
     toggleFlash: () -> Unit,
     toggleCamera: () -> Unit,
+    swapLayoutPositions: () -> Unit,
 ) {
     Box(
         Modifier
@@ -49,6 +52,18 @@ internal fun CameraControls(
                         Icon(
                             if (isFlashOn) IconPack.FlashOn else IconPack.FlashOff,
                             contentDescription = stringResource(R.string.ly_img_camera_toggle_flash),
+                        )
+                    }
+                }
+
+                if (isSwappingAllowed) {
+                    IconButton(
+                        modifier = Modifier.align(Alignment.Center),
+                        onClick = swapLayoutPositions,
+                    ) {
+                        Icon(
+                            IconPack.Switchsplitscreen,
+                            contentDescription = stringResource(R.string.ly_img_camera_swap_positions),
                         )
                     }
                 }

@@ -1,7 +1,7 @@
 apply from: "$projectDir/../editor-library.gradle"
 
 android {
-    namespace 'ly.img.camera'
+    namespace = 'ly.img.camera'
 }
 
 dependencies {

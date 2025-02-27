@@ -46,15 +46,18 @@ open class CaptureVideo : ActivityResultContract<Input, CameraResult?>() {
     /**
      * Basic configuration settings to initialize the camera.
      * @param engineConfiguration configuration to initialize the underlying engine.
-     * @param cameraConfiguration configuration to customise the camera experience and behaviour.
+     * @param cameraConfiguration optional configuration to customise the camera experience and behaviour.
+     * @param cameraMode the mode to start the camera in. By default, it is [CameraMode.Standard].
      */
     class Input(
         val engineConfiguration: EngineConfiguration,
         val cameraConfiguration: CameraConfiguration = CameraConfiguration(),
+        val cameraMode: CameraMode = CameraMode.Standard(),
     ) : Parcelable {
         constructor(parcel: Parcel) : this(
             ParcelCompat.readParcelable(parcel, EngineConfiguration::class.java.classLoader, EngineConfiguration::class.java)!!,
             ParcelCompat.readParcelable(parcel, CameraConfiguration::class.java.classLoader, CameraConfiguration::class.java)!!,
+            ParcelCompat.readParcelable(parcel, CameraConfiguration::class.java.classLoader, CameraMode::class.java)!!,
         )
 
         override fun writeToParcel(
@@ -63,6 +66,7 @@ open class CaptureVideo : ActivityResultContract<Input, CameraResult?>() {
         ) {
             parcel.writeParcelable(engineConfiguration, flags)
             parcel.writeParcelable(cameraConfiguration, flags)
+            parcel.writeParcelable(cameraMode, flags)
         }
 
         override fun describeContents(): Int {

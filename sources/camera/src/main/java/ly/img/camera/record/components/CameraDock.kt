@@ -1,7 +1,5 @@
 package ly.img.camera.record.components
 
-import android.app.Activity
-import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -24,14 +22,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ly.img.camera.components.Shadowed
 import ly.img.camera.core.CameraConfiguration
-import ly.img.camera.core.CameraResult
-import ly.img.camera.core.CaptureVideo
 import ly.img.camera.preview.CameraState
 import ly.img.camera.record.RecordingManager
 import ly.img.editor.core.theme.LocalExtendedColorScheme
 import ly.img.editor.core.ui.iconpack.Backspace
 import ly.img.editor.core.ui.iconpack.IconPack
-import ly.img.editor.core.ui.utils.activity
 
 @Composable
 internal fun CameraDock(
@@ -39,6 +34,8 @@ internal fun CameraDock(
     cameraState: CameraState,
     recordingManager: RecordingManager,
     cameraConfiguration: CameraConfiguration,
+    deletePreviousRecording: () -> Unit,
+    setResult: () -> Unit,
 ) {
     Box(modifier = modifier) {
         val state = recordingManager.state
@@ -81,7 +78,7 @@ internal fun CameraDock(
                     },
                     onConfirm = {
                         showDeleteLastRecordingDialog = false
-                        recordingManager.deletePreviousRecording()
+                        deletePreviousRecording()
                     },
                 )
             }
@@ -105,8 +102,8 @@ internal fun CameraDock(
                 Modifier
                     .align(Alignment.Center),
             recordingColor = cameraConfiguration.recordingColor,
-            maxDuration = cameraConfiguration.maxTotalDuration,
-            enabled = cameraState.isReady && !state.hasReachedMaxDuration,
+            maxDuration = recordingManager.state.maxDuration,
+            enabled = state.status != RecordingManager.Status.Disabled && cameraState.isReady && !state.hasReachedMaxDuration,
             hasStartedRecording = recordingManager.hasStartedRecording,
             isRecording = recordingManager.isRecording,
             isTimerRunning = state.status is RecordingManager.Status.TimerRunning,
@@ -130,15 +127,7 @@ internal fun CameraDock(
             enter = fadeIn() + slideInHorizontally(initialOffsetX = { it / 2 }),
             exit = fadeOut() + slideOutHorizontally(targetOffsetX = { it / 2 }),
         ) {
-            NextButton {
-                val intent =
-                    Intent().apply {
-                        putExtra(CaptureVideo.INTENT_KEY_CAMERA_RESULT, CameraResult.Record(ArrayList(state.recordings)))
-                    }
-                val activity = checkNotNull(context.activity)
-                activity.setResult(Activity.RESULT_OK, intent)
-                activity.finish()
-            }
+            NextButton(onClick = setResult)
         }
     }
 }

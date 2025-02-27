@@ -10,7 +10,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,12 +22,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ly.img.camera.components.CameraView
 import ly.img.camera.components.TOOLBAR_HEIGHT
 import ly.img.camera.setup.CameraEngineInitializer
 import ly.img.camera.setup.SetupView
+import ly.img.camera.util.SingleEvent
 import ly.img.editor.core.navbar.SystemNavBar
 import ly.img.editor.core.theme.EditorTheme
 import ly.img.editor.core.theme.LocalExtendedColorScheme
@@ -102,6 +109,39 @@ open class CameraActivity : ComponentActivity() {
                         onResult = {
                             initResult = it
                         },
+                    )
+                }
+
+                var showVideoErrorDialog by remember { mutableStateOf(false) }
+
+                LaunchedEffect(Unit) {
+                    viewModel.uiEvent.collect {
+                        when (it) {
+                            is SingleEvent.ErrorLoadingVideo -> showVideoErrorDialog = true
+                        }
+                    }
+                }
+
+                if (showVideoErrorDialog) {
+                    AlertDialog(
+                        onDismissRequest = { },
+                        title = {
+                            Text(text = stringResource(R.string.ly_img_camera_video_error_title))
+                        },
+                        text = {
+                            Text(text = stringResource(R.string.ly_img_camera_video_error_text))
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    showVideoErrorDialog = false
+                                    finish()
+                                },
+                            ) {
+                                Text(stringResource(R.string.ly_img_camera_video_error_dismiss))
+                            }
+                        },
+                        properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
                     )
                 }
             }

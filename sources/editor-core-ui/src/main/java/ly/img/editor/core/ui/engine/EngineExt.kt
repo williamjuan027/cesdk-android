@@ -257,9 +257,19 @@ fun BlockApi.isBackgroundTrack(designBlock: DesignBlock): Boolean {
 /**
  * An extension function for getting the background track from the scene.
  * A scene should have a maximum of one background track.
+ * A background track is created and appended to the current page if it doesn't exist already.
  *
- * @return the design block of the background track if it exists, null otherwise.
+ * @return the design block of the background track.
  */
-fun BlockApi.getBackgroundTrack(): DesignBlock? {
-    return findByType(DesignBlockType.Track).firstOrNull { isBackgroundTrack(it) }
+fun Engine.getBackgroundTrack(): DesignBlock {
+    return block.findByType(DesignBlockType.Track).firstOrNull { block.isBackgroundTrack(it) } ?: createBackgroundTrack()
+}
+
+private fun Engine.createBackgroundTrack(): DesignBlock {
+    val backgroundTrack = block.create(DesignBlockType.Track)
+    block.appendChild(parent = getCurrentPage(), child = backgroundTrack)
+    block.setAlwaysOnBottom(backgroundTrack, true)
+    block.fillParent(backgroundTrack)
+    block.setScopeEnabled(backgroundTrack, Scope.EditorSelect, false)
+    return backgroundTrack
 }

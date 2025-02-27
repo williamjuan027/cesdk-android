@@ -25,7 +25,8 @@ internal fun CameraEnginePreview(
     engine: Engine,
     cameraProvider: ProcessCameraProvider,
     cameraState: CameraState,
-    setCameraPreview: suspend (Float, Float) -> Unit,
+    setupLayout: suspend (Float, Float) -> Unit,
+    setCameraPreview: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -51,9 +52,10 @@ internal fun CameraEnginePreview(
         )
 
         LaunchedEffect(Unit) {
+            setupLayout(maxWidth.value, maxHeight.value)
             bind()
             cameraState.bind(cameraProvider, lifecycleOwner, scope)
-            setCameraPreview(maxWidth.value, maxHeight.value)
+            setCameraPreview()
         }
 
         DisposableEffect(engine) {

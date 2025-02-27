@@ -1,7 +1,9 @@
 package ly.img.camera.record
 
 import android.content.Context
+import android.graphics.RectF
 import android.net.Uri
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -26,13 +28,19 @@ internal class RecordingManager(
     private val coroutineScope: CoroutineScope,
     private val videoRecorder: VideoRecorder,
 ) {
-    var state by mutableStateOf(State())
+    var state by mutableStateOf(State(maxDuration = maxDuration))
         private set
+
+    val hasNotRecordedYet by derivedStateOf { state.totalRecordedDuration == Duration.ZERO }
 
     val isRecording
         get() = state.status is Status.Recording
     val hasStartedRecording
         get() = state.status is Status.Recording || state.status is Status.StartRecording
+
+    private var overridenMaxDuration: Duration? = null
+
+    lateinit var cameraRect: RectF
 
     fun toggleRecording(context: Context) {
         when {
@@ -77,10 +85,6 @@ internal class RecordingManager(
         state = state.copy(recordings = emptyList())
     }
 
-    fun pause() {
-        videoRecorder.pause()
-    }
-
     fun stop() {
         if (state.status is Status.TimerRunning) {
             resetTimer()
@@ -89,11 +93,16 @@ internal class RecordingManager(
         }
     }
 
-    fun resume() {
-        videoRecorder.resume()
+    fun enable() {
+        state = state.copy(status = Status.Idle)
     }
 
-    private fun startRecording(context: Context) {
+    fun overrideMaxDuration(duration: Duration) {
+        overridenMaxDuration = duration
+        state = state.copy(maxDuration = duration)
+    }
+
+    internal fun startRecording(context: Context) {
         state = state.copy(status = Status.StartRecording)
         var reachedMaxDuration = false
         videoRecorder.startRecording(context) { status ->
@@ -111,7 +120,12 @@ internal class RecordingManager(
                     state =
                         state.copy(
                             status = Status.Idle,
-                            recordings = state.recordings + Recording(listOf(Video(status.outputUri)), status.duration),
+                            recordings =
+                                state.recordings +
+                                    Recording(
+                                        videos = listOf(Video(uri = status.outputUri, rect = cameraRect)),
+                                        duration = status.duration,
+                                    ),
                             totalRecordedDuration = updatedDuration,
                             hasReachedMaxDuration = hasReachedMaxDuration(updatedDuration),
                         )
@@ -179,9 +193,13 @@ internal class RecordingManager(
         currentRecordingDuration: Duration? = (state.status as? Status.Recording)?.currentRecordingDuration,
     ) = recordings.fold(0.seconds) { total, recording -> total + recording.duration } + (currentRecordingDuration ?: 0.seconds)
 
-    private fun hasReachedMaxDuration(duration: Duration) = !allowExceedingMaxDuration && duration >= maxDuration
+    private fun hasReachedMaxDuration(duration: Duration): Boolean {
+        return overridenMaxDuration?.let { duration >= it } ?: (!allowExceedingMaxDuration && duration >= maxDuration)
+    }
 
     sealed interface Status {
+        data object Disabled : Status
+
         data object Idle : Status
 
         data class TimerRunning(val remainingTime: Int, val totalTime: Int) : Status
@@ -196,6 +214,7 @@ internal class RecordingManager(
         val recordings: List<Recording> = emptyList(),
         val totalRecordedDuration: Duration = Duration.ZERO,
         val hasReachedMaxDuration: Boolean = false,
-        val status: Status = Status.Idle,
+        val status: Status = Status.Disabled,
+        val maxDuration: Duration,
     )
 }

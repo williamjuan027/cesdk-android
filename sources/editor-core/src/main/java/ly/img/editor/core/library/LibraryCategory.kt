@@ -251,6 +251,18 @@ data class LibraryCategory(
         }
 
         /**
+         * The default library category for sticker and shape assets.
+         */
+        val StickersAndShapes by lazy {
+            LibraryCategory(
+                tabTitleRes = R.string.ly_img_editor_stickers,
+                tabSelectedIcon = IconPack.StickerEmoji,
+                tabUnselectedIcon = IconPack.StickerEmojiOutline,
+                content = LibraryContent.StickersAndShapes,
+            )
+        }
+
+        /**
          * All the source types of the library content.
          */
         val LibraryContent.sourceTypes: List<AssetSourceType>
