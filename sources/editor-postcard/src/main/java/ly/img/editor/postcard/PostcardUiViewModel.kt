@@ -83,12 +83,12 @@ class PostcardUiViewModel(
         register<PostcardEvent.OnChangeTemplateColor> { onChangeTemplateColor(it.name, it.color) }
     }
 
-    override fun getBlockForEvents(): Block {
-        return super.getBlockForEvents() ?: Block(
-            designBlock = engine.requirePinnedBlock(),
-            type = BlockType.Text,
-        )
-    }
+//    override fun getBlockForEvents(): Block {
+//        return super.getBlockForEvents() ?: Block(
+//            designBlock = engine.requirePinnedBlock(),
+//            type = BlockType.Text,
+//        )
+//    }
 
     override fun onPreCreate() {
         super.onPreCreate()

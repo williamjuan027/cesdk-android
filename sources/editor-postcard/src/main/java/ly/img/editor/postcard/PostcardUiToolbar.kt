@@ -146,7 +146,8 @@ internal fun PostcardUiToolbar(
                     onClick = { onEvent(Event.OnExportClick) },
                 ) {
                     Text (
-                        text = "Export"
+//                        text = "Export"
+                        text = stringResource(R.string.ly_img_editor_share),
                     )
                 }
 //                } else {
